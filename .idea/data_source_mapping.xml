@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DataSourcePerFileMappings">
+    <file url="file://$APPLICATION_CONFIG_DIR$/consoles/db/52324f9e-8eef-4f87-99c8-e23ed957f957/console_1.sql" value="52324f9e-8eef-4f87-99c8-e23ed957f957" />
+    <file url="file://$APPLICATION_CONFIG_DIR$/consoles/db/52324f9e-8eef-4f87-99c8-e23ed957f957/rank_pesquisa.sql" value="52324f9e-8eef-4f87-99c8-e23ed957f957" />
+    <file url="file://$APPLICATION_CONFIG_DIR$/consoles/db/52324f9e-8eef-4f87-99c8-e23ed957f957/rank_pix.sql" value="52324f9e-8eef-4f87-99c8-e23ed957f957" />
+    <file url="file://$APPLICATION_CONFIG_DIR$/consoles/db/52324f9e-8eef-4f87-99c8-e23ed957f957/rank_recarga.sql" value="52324f9e-8eef-4f87-99c8-e23ed957f957" />
+    <file url="file://$APPLICATION_CONFIG_DIR$/consoles/db/52324f9e-8eef-4f87-99c8-e23ed957f957/ranking_cache.sql" value="52324f9e-8eef-4f87-99c8-e23ed957f957" />
+    <file url="file://$APPLICATION_CONFIG_DIR$/consoles/db/52324f9e-8eef-4f87-99c8-e23ed957f957/torneios.sql" value="52324f9e-8eef-4f87-99c8-e23ed957f957" />
+    <file url="file://$APPLICATION_CONFIG_DIR$/consoles/db/52324f9e-8eef-4f87-99c8-e23ed957f957/user_creation.sql" value="52324f9e-8eef-4f87-99c8-e23ed957f957" />
+    <file url="file://$APPLICATION_CONFIG_DIR$/consoles/db/52324f9e-8eef-4f87-99c8-e23ed957f957/usuarios.sql" value="52324f9e-8eef-4f87-99c8-e23ed957f957" />
+  </component>
+</project>
