@@ -1,7 +1,20 @@
-import type { NextConfig } from "next";
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+    // Isso permite exportar como HTML estático para colocar no Apache depois
+    output: 'export',
 
-const nextConfig: NextConfig = {
-  /* config options here */
+    // Descomente as linhas abaixo se for rodar o Next como servidor Node.
+    // Se for usar 'export' (estático), essa configuração de rewrite
+    // serve apenas para o ambiente de desenvolvimento (npm run dev).
+    async rewrites() {
+        return [
+            {
+                source: '/api/:path*',
+                // Aponte para onde seu PHP está rodando localmente (ex: XAMPP)
+                destination: 'http://localhost/api/:path*',
+            },
+        ];
+    },
 };
 
-export default nextConfig;
+module.exports = nextConfig;
