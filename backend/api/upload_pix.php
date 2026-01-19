@@ -2,6 +2,29 @@
 header('Content-Type: application/json; charset=utf-8');
 require_once './config.php';
 
+function formatarPDV($codigoOriginal) {
+    $codigo = trim($codigoOriginal);
+
+    // Regra 1 - PDV - Começa com "UN"
+    if(strpos($codigo, 'UN') === 0) {
+        $numero = (int)preg_replace('/[^0-9]/', '', $codigo);
+        return "PDV $numero";
+    }
+
+    if(strpos($codigo, 'SE') === 0) {
+        $numero = (int)preg_replace('/[^0-9]/', '', $codigo);
+
+        if ($numero >= 100) {
+            $numeroFinal = $numero - 100;
+            return "Empresa $numeroFinal";
+        } else {
+            return "Empresa $numero";
+        }
+    }
+
+    return $codigoOriginal;
+}
+
 try {
     if (!isset($pdo)) {
         $pdo = new PDO($dsn, $user, $pass, $options);
@@ -21,7 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES[$arquivo_pix_csv])) {
     if (($handle = fopen($csvFile, "r")) !== FALSE) {
 
         // Pula a primeira linha do CSV
-        fgetcsv($handle, 1000, ",");
+        fgetcsv($handle, 1000, ";", "\"");
 
         // O "ON DUPLICATE KEY UPDATE" faz com que o valor seja atualizado se já existir a key
         $sql = "
@@ -38,7 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES[$arquivo_pix_csv])) {
             $pdo->beginTransaction();
             $linhasImportadas = 0;
 
-            while(($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
+            while(($data = fgetcsv($handle, 1000, ";", "\"")) !== FALSE) {
                 /* Mapa de atributos
                  * $data[0] => Data(dd/mm/yyyy)
                  * $data[1] => Operador
@@ -56,14 +79,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES[$arquivo_pix_csv])) {
                 if (!$dataObj) continue; // Pula se data for inválida
                 $dataFormatada = $dataObj->format('Y-m-d');
 
+                // Tratamento de PDV
+                $caixaFormatado = formatarPDV($data[2]);
+
+                // Tratamento de Cupom Fiscal/ NFe
+                $transacaoInt = (int)$data[3];
+
                 // Limpa o valor monetário (troca vírgula por ponto se necessário)
-                $valorFormatado = str_replace(['R$', ' ', ','], ['', '', '.'], $data[5]);
+                $valorLimpo = str_replace('.', '', $data[5]);
+                $valorFormatado = str_replace(',', '.', $valorLimpo);
 
                 $stmt->execute([
                     ':data' => $dataFormatada,
                     ':operador' => $data[1],
-                    ':caixa' => $data[2],
-                    ':transacao' => $data[3],
+                    ':caixa' => $caixaFormatado,
+                    ':transacao' => $transacaoInt,
                     ':qtd_pix' => $data[4],
                     ':valor_pix' => $valorFormatado
                 ]);

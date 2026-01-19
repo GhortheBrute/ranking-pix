@@ -22,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES[$arquivo_recarga_csv]
     if (($handle = fopen($csvFile, "r")) !== FALSE) {
 
         // Pula a primeira linha do CSV
-        fgetcsv($handle, 1000, ",");
+        fgetcsv($handle, 1000, ";");
 
         // O "ON DUPLICATE KEY UPDATE" faz com que o valor seja atualizado se já existir a key
         $sql = "
@@ -41,7 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES[$arquivo_recarga_csv]
         $linhasImportadas = 0;
 
         try{
-            while(($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
+            while(($data = fgetcsv($handle, 1000, ";", "\"")) !== FALSE) {
                 /* Mapa de atributos
                  * $data[0] => Data(dd/mm/yyyy)
                  * $data[1] => Operador
@@ -49,11 +49,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES[$arquivo_recarga_csv]
                  * $data[3] => Valor da Recarga
                  */
 
+                if (count($data) < 4) continue;
+
                 // Converte Data de dd/mm/yyyy para yyyy-mm-dd
                 $dataFormatada = DateTime::createFromFormat('d/m/Y', $data[0])->format('Y-m-d');
 
                 // Limpa o valor monetário (troca vírgula por ponto se necessário)
-                $valorFormatado = str_replace(['R$', ' ', ','], ['', '', '.'], $data[3]);
+                $valorLimpo = str_replace('.','',$data[3]);
+                $valorFormatado = str_replace(',', '.', $valorLimpo);
 
                 $stmt->execute([
                     ':data' => $dataFormatada,
