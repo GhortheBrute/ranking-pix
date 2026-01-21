@@ -11,7 +11,7 @@ const nextConfig = {
             {
                 source: '/api/:path*',
                 // Aponte para onde seu PHP está rodando localmente (ex: XAMPP)
-                destination: 'http://localhost/api/:path*',
+                destination: 'http://localhost:8000/api/:path*',
             },
         ];
     },
