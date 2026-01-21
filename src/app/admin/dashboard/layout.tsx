@@ -18,6 +18,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     const router = useRouter();
     const pathname = usePathname();
 
+    const ADMIN_URL = '/admin/dashboard';
+
     // Verificação de segurança ao carregar
     useEffect(() => {
         const token = localStorage.getItem('admin_token');
@@ -46,50 +48,50 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     const menuItems = [
         {
             label: 'Dashboard',
-            href: '/admin/dashboard',
+            href: `${ADMIN_URL}`,
             icon: LayoutDashboard,
             roles: ['admin', 'user']
         },
         {
             label: 'Operadores',
-            href: '/admin/dashboard/operadores',
+            href: `${ADMIN_URL}/operadores`,
             icon: Users,
             roles: ['admin', 'user']
         },
         {
             label: 'Torneios',
-            href: '/admin/dashboard/torneios',
+            href: `${ADMIN_URL}/torneios`,
             icon: Trophy,
             roles: ['admin', 'user']
         },
         {
             label: 'Pesquisas',
-            href: '/admin/dashboard/pesquisas',
+            href: `${ADMIN_URL}/pesquisas`,
             icon: ClipboardList,
             roles: ['admin', 'user']
         },
         // Itens exclusivos de Admin
         {
             label: 'Upload de Dados',
-            href: '/admin/dashboard/upload',
+            href: `${ADMIN_URL}/upload`,
             icon: Upload,
             roles: ['admin']
         },
         {
             label: 'Usuários do Sistema',
-            href: '/admin/dashboard/usuarios',
+            href: `${ADMIN_URL}/usuarios`,
             icon: UserCog,
             roles: ['admin']
         },
         {
             label: 'Regras',
-            href: '/admin/dashboard/regras',
+            href: `${ADMIN_URL}/regras`,
             icon: ScrollText,
             roles: ['admin', 'user']
         },
         {
             label: 'Logs do Sistema',
-            href: '/admin/dashboard/logs',
+            href: `${ADMIN_URL}/logs`,
             icon: Activity,
             roles: ['admin']
         },

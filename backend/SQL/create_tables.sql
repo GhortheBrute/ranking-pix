@@ -54,6 +54,16 @@ CREATE TABLE rank_recarga (
                               INDEX idx_data (data)
 );
 
+-- 6. Tabela de Torneios
+    CREATE TABLE torneios (
+                            id INT PRIMARY KEY AUTO_INCREMENT,
+                            nome VARCHAR(100) NOT NULL,
+                            data_inicio DATE NOT NULL,
+                            data_fim    DATE NOT NULL,
+                            regras JSON NOT NULL,
+                            ativo BOOLEAN DEFAULT TRUE
+    );
+
 -- 5. Tabela de Pesquisa
 create table rank_pesquisa (
                             id INT PRIMARY KEY AUTO_INCREMENT,
@@ -79,4 +89,10 @@ CREATE TABLE ranking_cache (
                                    FOREIGN KEY (torneio_id)
                                        REFERENCES torneios(id)
                                        ON DELETE CASCADE
+);
+
+-- 7. Tabela de Regras para os torneios
+CREATE TABLE regras(
+                            id INT PRIMARY KEY AUTO_INCREMENT,
+                            regras JSON NOT NULL
 );

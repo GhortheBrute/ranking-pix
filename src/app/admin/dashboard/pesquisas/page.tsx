@@ -1,5 +1,5 @@
 export default function Pesquisas() {
     return (
-        <h1>Em construção...</h1>
+        <h1>Em construção (PESQUISAS)...</h1>
     )
 }
