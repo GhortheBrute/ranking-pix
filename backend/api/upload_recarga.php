@@ -2,7 +2,28 @@
 header('Content-Type: application/json');
 require_once './config.php';
 
-$arquivo_recarga_csv = file_get_contents('php://input');
+$nomeDoArquivo = 'arquivo_recarga_csv';
+
+function validaCabecalho($cabecalho): mixed {
+    $cabecalhoEsperado = [
+        'Data',
+        'Operador',
+        'Quantidade de Transações',
+        'Valor Total'
+    ];
+
+    // Limpa caracteres invisíveis
+    if (isset($cabecalho[0])) {
+        $cabecalho[0] = preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $cabecalho[0]);
+    }
+
+    // Compara os dois arrays
+    if ($cabecalho !== $cabecalhoEsperado) {
+        return false;
+    }
+
+    return true;
+}
 
 try {
     if (!isset($pdo)) {
@@ -15,16 +36,16 @@ try {
 }
 
 // Verifica se o arquivo foi enviado
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES[$arquivo_recarga_csv])) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES[$nomeDoArquivo])) {
 
-    $csvFile = $_FILES[$arquivo_recarga_csv]['tmp_name'];
+    $csvFile = $_FILES[$nomeDoArquivo]['tmp_name'];
 
     if (($handle = fopen($csvFile, "r")) !== FALSE) {
 
         // Pula a primeira linha do CSV
-        fgetcsv($handle, 1000, ";");
-
-        // O "ON DUPLICATE KEY UPDATE" faz com que o valor seja atualizado se já existir a key
+        $cabecalho = fgetcsv($handle, 1000, ";");
+        if (validaCabecalho($cabecalho)) {
+           // O "ON DUPLICATE KEY UPDATE" faz com que o valor seja atualizado se já existir a key
         $sql = "
             INSERT INTO rank_recarga (data, operador, qtd_recarga, valor_recarga)
                     VALUES (:data, :operador, :qtd_recarga, :valor_recarga)
@@ -84,7 +105,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES[$arquivo_recarga_csv]
             echo json_encode(["success" => false, "error" => $e->getMessage()]);
         }
 
-        fclose($handle);
+        fclose($handle); 
+        } else {
+            http_response_code(400);
+            echo json_encode([
+                "success" => false,
+                "error" => "Cabeçalho inválido. Verifique o modelo do CSV.",
+                "recebido" => $cabecalho
+            ]);
+            exit;
+        }
+
+        
     } else {
         http_response_code(400);
         echo json_encode(["success" => false, "error" => "Não foi possível abrir o arquivo CSV."]);
