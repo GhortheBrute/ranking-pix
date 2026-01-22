@@ -92,7 +92,10 @@ CREATE TABLE ranking_cache (
 );
 
 -- 7. Tabela de Regras para os torneios
-CREATE TABLE regras(
+CREATE TABLE regras_modelos(
                             id INT PRIMARY KEY AUTO_INCREMENT,
-                            regras JSON NOT NULL
+                            nome VARCHAR(100) NOT NULL,
+                            regras JSON NOT NULL,
+                            ativo TINYINT(1) DEFAULT 1,
+                            criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

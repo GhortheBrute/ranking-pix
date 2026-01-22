@@ -61,8 +61,8 @@ try {
 
 $nomeDoArquivo = 'arquivo_pix_csv';
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES[$nomeCampoArquivo])) {
-    $csvFile = $_FILES[$nomeCampoArquivo]['tmp_name'];
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES[$nomeDoArquivo])) {
+    $csvFile = $_FILES[$nomeDoArquivo]['tmp_name'];
 
     if (($handle = fopen($csvFile, "r")) !== FALSE) {
         

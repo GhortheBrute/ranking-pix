@@ -1,28 +1,23 @@
 <?php
-header('Content-Type: application/json');
+header('Content-Type: application/json; charset=utf-8'); // Adicionei charset
 require_once './config.php';
 
 $nomeDoArquivo = 'arquivo_recarga_csv';
 
-function validaCabecalho($cabecalho): mixed {
+// --- Funções Auxiliares ---
+function validaCabecalho($cabecalho) {
     $cabecalhoEsperado = [
         'Data',
         'Operador',
-        'Quantidade de Transações',
+        'Quantidade de Transações', // Verifique se no CSV está acentuado ou "Transacoes"
         'Valor Total'
     ];
 
-    // Limpa caracteres invisíveis
     if (isset($cabecalho[0])) {
         $cabecalho[0] = preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $cabecalho[0]);
     }
 
-    // Compara os dois arrays
-    if ($cabecalho !== $cabecalhoEsperado) {
-        return false;
-    }
-
-    return true;
+    return $cabecalho === $cabecalhoEsperado;
 }
 
 try {
@@ -35,52 +30,91 @@ try {
     exit;
 }
 
-// Verifica se o arquivo foi enviado
+// --- Processamento ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES[$nomeDoArquivo])) {
 
     $csvFile = $_FILES[$nomeDoArquivo]['tmp_name'];
 
     if (($handle = fopen($csvFile, "r")) !== FALSE) {
 
-        // Pula a primeira linha do CSV
+        // 1. Validação de Cabeçalho
         $cabecalho = fgetcsv($handle, 1000, ";");
-        if (validaCabecalho($cabecalho)) {
-           // O "ON DUPLICATE KEY UPDATE" faz com que o valor seja atualizado se já existir a key
-        $sql = "
-            INSERT INTO rank_recarga (data, operador, qtd_recarga, valor_recarga)
-                    VALUES (:data, :operador, :qtd_recarga, :valor_recarga)
-                    ON DUPLICATE KEY UPDATE
-                    qtd_recarga = VALUES(qtd_recarga),
-                    valor_recarga = VALUES(valor_recarga)
-        ";
+        if (!validaCabecalho($cabecalho)) {
+            fclose($handle); // Sempre bom fechar antes de sair
+            http_response_code(400);
+            echo json_encode(["success" => false, "error" => "Cabeçalho inválido."]);
+            exit;
+        }
+
+        // 2. Carrega para Memória
+        $dadosCSV = [];
+        $idsNoCSV = [];
+
+        while (($linha = fgetcsv($handle, 1000, ";", "\"")) !== FALSE) {
+            // CORREÇÃO 1: Recarga tem 4 colunas, não 6
+            if (count($linha) < 4) continue;
+
+            $dadosCSV[] = $linha;
+            $idsNoCSV[] = (int)$linha[1];
+        }
+        fclose($handle); // Arquivo fechado aqui. Não podemos usar $handle depois.
+
+        if (empty($dadosCSV)) {
+            echo json_encode(["success" => false, "error" => "O arquivo está vazio."]);
+            exit;
+        }
+
+        // 3. Verifica Operadores Faltantes
+        $idsUnicosCSV = array_unique($idsNoCSV);
+
+        if (!empty($idsUnicosCSV)) {
+            $placeholders = implode(',', array_fill(0, count($idsUnicosCSV), '?'));
+            $sqlCheck = "SELECT matricula FROM operadores WHERE matricula IN ($placeholders)";
+            $stmtCheck = $pdo->prepare($sqlCheck);
+            $stmtCheck->execute(array_values($idsUnicosCSV));
+            $idsNoBanco = $stmtCheck->fetchAll(PDO::FETCH_COLUMN);
+
+            $idsFaltantes = array_diff($idsUnicosCSV, $idsNoBanco);
+
+            if (!empty($idsFaltantes)) {
+                echo json_encode([
+                    "success" => false,
+                    "error" => "operadores_inexistentes",
+                    "ids" => array_values($idsFaltantes)
+                ]);
+                exit;
+            }
+        }
+
+        // 4. Inserção no Banco
+        $sql = "INSERT INTO rank_recarga (data, operador, qtd_recarga, valor_recarga)
+                VALUES (:data, :operador, :qtd_recarga, :valor_recarga)
+                ON DUPLICATE KEY UPDATE
+                qtd_recarga = VALUES(qtd_recarga),
+                valor_recarga = VALUES(valor_recarga)";
 
         $stmt = $pdo->prepare($sql);
 
-        // Inicia a Transação
-        $pdo->beginTransaction();
+        try {
+            $pdo->beginTransaction();
+            $linhasImportadas = 0;
 
-        $linhasImportadas = 0;
+            // CORREÇÃO 2: Usamos o array da memória ($dadosCSV), não o arquivo fechado ($handle)
+            foreach ($dadosCSV as $data) {
 
-        try{
-            while(($data = fgetcsv($handle, 1000, ";", "\"")) !== FALSE) {
-                /* Mapa de atributos
-                 * $data[0] => Data(dd/mm/yyyy)
-                 * $data[1] => Operador
-                 * $data[2] => Quantidade de Recargas
-                 * $data[3] => Valor da Recarga
-                 */
-
+                // Validação extra de segurança
                 if (count($data) < 4) continue;
 
-                // Converte Data de dd/mm/yyyy para yyyy-mm-dd
-                $dataFormatada = DateTime::createFromFormat('d/m/Y', $data[0])->format('Y-m-d');
+                // CORREÇÃO 3: Segurança na conversão de data
+                $dataObj = DateTime::createFromFormat('d/m/Y', $data[0]);
+                if (!$dataObj) continue; // Pula se a data for inválida
 
-                // Limpa o valor monetário (troca vírgula por ponto se necessário)
-                $valorLimpo = str_replace('.','',$data[3]);
+                // Formatações
+                $valorLimpo = str_replace(['.', 'R$', ' '], '', $data[3]); // Limpeza extra
                 $valorFormatado = str_replace(',', '.', $valorLimpo);
 
                 $stmt->execute([
-                    ':data' => $dataFormatada,
+                    ':data' => $dataObj->format('Y-m-d'),
                     ':operador' => $data[1],
                     ':qtd_recarga' => $data[2],
                     ':valor_recarga' => $valorFormatado
@@ -89,34 +123,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES[$nomeDoArquivo])) {
                 $linhasImportadas++;
             }
 
-            // Se tudo deu certo, salva no banco de dados
             $pdo->commit();
             echo json_encode([
                 "success" => true,
-                "message" => "$linhasImportadas linhas importadas para Ranking PIX."
+                "message" => "$linhasImportadas linhas importadas para Ranking Recarga." // Ajustei o texto PIX -> Recarga
             ]);
 
-            // ***Gatilho de Recalculo ***
-            // Como os dados mudaram, podemos marcar o cache como sujo ou limpamos ele
-            // $pdo->query("UPDATE ranking_cache SET expirado = 1 WHERE ...");
         } catch (PDOException $e) {
             $pdo->rollBack();
             http_response_code(500);
             echo json_encode(["success" => false, "error" => $e->getMessage()]);
         }
 
-        fclose($handle); 
-        } else {
-            http_response_code(400);
-            echo json_encode([
-                "success" => false,
-                "error" => "Cabeçalho inválido. Verifique o modelo do CSV.",
-                "recebido" => $cabecalho
-            ]);
-            exit;
-        }
-
-        
     } else {
         http_response_code(400);
         echo json_encode(["success" => false, "error" => "Não foi possível abrir o arquivo CSV."]);
@@ -125,3 +143,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES[$nomeDoArquivo])) {
     http_response_code(400);
     echo json_encode(["success" => false, "error" => "Arquivo não enviado."]);
 }
+?>
