@@ -73,7 +73,7 @@ export default function UploadPage() {
         }
     };
 
-    const handleOpenCreate = (id: any) => {
+    const handleOpenCreate = (id: string) => {
         setFormData({ matricula: id, nome: '', apelido: '' });
         setIsModalOpen(true);
     };
@@ -95,7 +95,7 @@ export default function UploadPage() {
                     setIsModalOpen(false); // Fecha modal
 
                     // Remove o primeiro item da fila e fará o useEffect rodar novamente.
-                    setFilaIds((prev: any[]) => prev.slice(1));
+                    setFilaIds((prev: string[]) => prev.slice(1));
 
                 } else {
                     alert(data.erro || 'Erro ao salvar');
