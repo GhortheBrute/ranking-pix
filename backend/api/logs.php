@@ -1,0 +1,19 @@
+<?php
+// api/logs.php
+header("Content-Type: application/json; charset=UTF-8");
+require 'config.php';
+
+$method = $_SERVER['REQUEST_METHOD'];
+
+// 1. LISTAR LOGS (GET)
+if ($method === 'GET') {
+    // Traz todos, ordenados por data, limitados a 100 registros
+    $stmt = $pdo->query("SELECT l.*, u.username as nome_admin
+                                FROM logs l
+                                LEFT JOIN usuarios u ON l.admin_id = u.id
+                                ORDER BY data DESC LIMIT 100");
+    $logs = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    echo json_encode($logs);
+    exit;
+}
+?>
