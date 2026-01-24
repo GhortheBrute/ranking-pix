@@ -3,11 +3,13 @@
   <component name="DataSourcePerFileMappings">
     <file url="file://$PROJECT_DIR$/backend/SQL/create_tables.sql" value="52324f9e-8eef-4f87-99c8-e23ed957f957" />
     <file url="file://$PROJECT_DIR$/backend/SQL/populate/operadores.sql" value="52324f9e-8eef-4f87-99c8-e23ed957f957" />
+    <file url="file://$PROJECT_DIR$/backend/SQL/populate/regras_modelos.sql" value="52324f9e-8eef-4f87-99c8-e23ed957f957" />
     <file url="file://$PROJECT_DIR$/backend/SQL/populate/torneios.sql" value="52324f9e-8eef-4f87-99c8-e23ed957f957" />
     <file url="file://$PROJECT_DIR$/backend/SQL/populate/usuarios.sql" value="52324f9e-8eef-4f87-99c8-e23ed957f957" />
     <file url="file://$PROJECT_DIR$/backend/api/get_ranking.php" value="52324f9e-8eef-4f87-99c8-e23ed957f957" />
     <file url="file://$PROJECT_DIR$/backend/api/operadores.php" value="52324f9e-8eef-4f87-99c8-e23ed957f957" />
     <file url="file://$PROJECT_DIR$/backend/api/regras.php" value="52324f9e-8eef-4f87-99c8-e23ed957f957" />
+    <file url="file://$PROJECT_DIR$/backend/api/torneios.php" value="52324f9e-8eef-4f87-99c8-e23ed957f957" />
     <file url="file://$PROJECT_DIR$/backend/api/upload_pesquisas.php" value="52324f9e-8eef-4f87-99c8-e23ed957f957" />
     <file url="file://$PROJECT_DIR$/backend/api/upload_pix.php" value="52324f9e-8eef-4f87-99c8-e23ed957f957" />
     <file url="file://$PROJECT_DIR$/backend/api/upload_recarga.php" value="52324f9e-8eef-4f87-99c8-e23ed957f957" />

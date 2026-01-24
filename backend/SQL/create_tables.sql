@@ -54,17 +54,30 @@ CREATE TABLE rank_recarga (
                               INDEX idx_data (data)
 );
 
--- 6. Tabela de Torneios
-    CREATE TABLE torneios (
-                            id INT PRIMARY KEY AUTO_INCREMENT,
-                            nome VARCHAR(100) NOT NULL,
-                            data_inicio DATE NOT NULL,
-                            data_fim    DATE NOT NULL,
-                            regras JSON NOT NULL,
-                            ativo BOOLEAN DEFAULT TRUE
-    );
+-- 5. Tabela de Regras para os torneios
+CREATE TABLE regras_modelos(
+                               id INT PRIMARY KEY AUTO_INCREMENT,
+                               nome VARCHAR(100) NOT NULL,
+                               regras JSON NOT NULL,
+                               ativo TINYINT(1) DEFAULT 1,
+                               criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
--- 5. Tabela de Pesquisa
+-- 6. Tabela de Torneios
+CREATE TABLE torneios (
+                          id INT AUTO_INCREMENT PRIMARY KEY,
+                          nome VARCHAR(100) NOT NULL,       -- Ex: "Arrancada de Outubro"
+                          data_inicio DATE NOT NULL,
+                          data_fim DATE NOT NULL,
+                          regra_id INT NOT NULL,            -- Qual modelo de regras usar
+                          ativo TINYINT(1) DEFAULT 1,
+                          criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    -- Garante que se apagar a regra, não quebra o torneio (opcional, mas seguro)
+                          CONSTRAINT fk_torneio_regra FOREIGN KEY (regra_id) REFERENCES regras_modelos(id)
+);
+
+-- 7. Tabela de Pesquisa
 create table rank_pesquisa (
                             id INT PRIMARY KEY AUTO_INCREMENT,
                             torneio INT NOT NULL,
@@ -80,7 +93,7 @@ create table rank_pesquisa (
                             UNIQUE KEY unique_pesquisa_torneio (torneio, operador)
 );
 
--- 6. Tabela de Cache
+-- 8. Tabela de Cache
 CREATE TABLE ranking_cache (
                                torneio_id INT PRIMARY KEY,
                                ultimo_calculo TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -91,11 +104,3 @@ CREATE TABLE ranking_cache (
                                        ON DELETE CASCADE
 );
 
--- 7. Tabela de Regras para os torneios
-CREATE TABLE regras_modelos(
-                            id INT PRIMARY KEY AUTO_INCREMENT,
-                            nome VARCHAR(100) NOT NULL,
-                            regras JSON NOT NULL,
-                            ativo TINYINT(1) DEFAULT 1,
-                            criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);

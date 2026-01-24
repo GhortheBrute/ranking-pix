@@ -38,28 +38,35 @@ if ($method === 'POST') {
             $sql = "UPDATE torneios SET ativo = NOT ativo WHERE id = :id";
             $stmt = $pdo->prepare($sql);
             $stmt->execute([$data->id]);
-            echo json_encode(['success' => true]);
+            echo json_encode(['success' => true, 'message' => 'Status alterado com sucesso!']);
             exit;
-        }
-
-        // Tratamento do JSON de Regras
-        $regrasJSON = $data->regras;
-        if (!is_string($regrasJSON)) {
-            $regrasJSON = json_encode($regrasJSON);
         }
 
         // Ação: SALVAR (Insert ou Update)
         // Se vier "is_edit", fazemos UPDATE. Senão, INSERT.
         if (isset($data->is_edit) && $data->is_edit === true) {
             // Atualiza Nome e Apelido
-            $sql = "UPDATE torneios SET nome = ?, data_inicio=?, data_fim=?, regras_id = ? WHERE id = ?";
+            $sql = "UPDATE torneios 
+                    SET nome = ?, data_inicio=?, data_fim=?, regras_id = ? 
+                    WHERE id = ?";
             $stmt = $pdo->prepare($sql);
-            $stmt->execute([$data->nome, $data->data_inicio, $data->data_fim, $data->regras_id, $data->id]);
+            $stmt->execute([
+                $data->nome,
+                $data->data_inicio,
+                $data->data_fim,
+                $data->regras_id,
+                $data->id
+            ]);
         } else {
             // Cria Novo
-            $sql = "INSERT INTO torneios ( nome, data_inicio, data_fim, regras_id, ativo) VALUES ( ?, ?, ?, ?, 1)";
+            $sql = "INSERT INTO torneios ( nome, data_inicio, data_fim, regras_id) VALUES ( ?, ?, ?, ?)";
             $stmt = $pdo->prepare($sql);
-            $stmt->execute([$data->nome, $data->data_inicio, $data->data_fim, $data->regras_id]);
+            $stmt->execute([
+                $data->nome,
+                $data->data_inicio,
+                $data->data_fim,
+                $data->regras_id
+            ]);
         }
 
         echo json_encode(['success' => true]);

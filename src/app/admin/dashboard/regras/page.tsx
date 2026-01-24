@@ -48,10 +48,12 @@ const REGRAS_DEFAULT: RegrasJSON = {
     bonus: {
         meta_pix_qtd: 0,
         meta_pix_valor: 0.00,
-        pontos_bonus_pix: 0,
+        pontos_bonus_pix_qtd: 0,
+        pontos_bonus_pix_valor: 0.00,
         meta_recarga_qtd: 0,
         meta_recarga_valor: 0.00,
-        pontos_bonus_recarga: 0
+        pontos_bonus_recarga_qtd: 0,
+        pontos_bonus_recarga_valor: 0.00
     },
     premios: {
         ativar_roleta: false,
@@ -91,6 +93,8 @@ export default function RegrasPage() {
             setLoading(false);
         }
     };
+
+
 
     useEffect(() => { fetchModelos(); }, []);
 
