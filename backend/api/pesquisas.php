@@ -1,7 +1,5 @@
 <?php
-session_start();
-header('Content-Type: application/json');
-require_once './config.php';
+require 'header.php';
 
 $jsonData = file_get_contents('php://input');
 $data = json_decode($jsonData, true);

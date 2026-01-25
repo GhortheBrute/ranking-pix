@@ -1,7 +1,5 @@
 <?php
-session_start();
-header("Content-Type: application/json; charset=UTF-8");
-require 'config.php';
+require 'header.php';
 
 $method = $_SERVER['REQUEST_METHOD'];
 
@@ -36,7 +34,7 @@ if ($method === 'POST') {
 
         // Ação: TOGGLE STATUS
         if (isset($data->acao) && $data->acao == 'toggle_status') {
-            $sql = "UPDATE torneios SET ativo = NOT ativo WHERE id = :id";
+            $sql = "UPDATE torneios SET ativo = NOT ativo WHERE id = ?";
             $stmt = $pdo->prepare($sql);
             $stmt->execute([$data->id]);
             echo json_encode(['success' => true, 'message' => 'Status alterado com sucesso!']);

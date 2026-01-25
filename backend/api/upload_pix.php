@@ -1,6 +1,5 @@
 <?php
-header('Content-Type: application/json; charset=utf-8');
-require_once './config.php';
+require 'header.php';
 
 function formatarPDV($codigoOriginal) {
     $codigo = trim($codigoOriginal);

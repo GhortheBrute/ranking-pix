@@ -1,6 +1,5 @@
 <?php
-header('Content-Type: application/json; charset=utf-8'); // Adicionei charset
-require_once './config.php';
+require 'header.php';
 
 $nomeDoArquivo = 'arquivo_recarga_csv';
 

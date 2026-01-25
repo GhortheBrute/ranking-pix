@@ -1,8 +1,6 @@
 <?php
 // api/operadores.php
-session_start();
-header("Content-Type: application/json; charset=UTF-8");
-require 'config.php';
+require 'header.php';
 
 $method = $_SERVER['REQUEST_METHOD'];
 
