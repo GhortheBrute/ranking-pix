@@ -57,6 +57,7 @@ if ($method === 'POST') {
                 $data->regras_id,
                 $data->id
             ]);
+            logAdmin($pdo, $data->admin_id, 'atualizar_torneio', ['alvo' => $data->nome]);
         } else {
             // Cria Novo
             $sql = "INSERT INTO torneios ( nome, data_inicio, data_fim, regras_id) VALUES ( ?, ?, ?, ?)";
@@ -67,6 +68,7 @@ if ($method === 'POST') {
                 $data->data_fim,
                 $data->regras_id
             ]);
+            logAdmin($pdo, $data->admin_id, 'criar_torneio', ['alvo' => $data->nome]);
         }
 
         echo json_encode(['success' => true]);

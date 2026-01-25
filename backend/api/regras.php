@@ -29,6 +29,7 @@ if ($method === 'POST') {
             $sql = "UPDATE regras_modelos SET ativo = NOT ativo WHERE id = :id";
             $stmt = $pdo->prepare($sql);
             $stmt->execute([$data->id]);
+            logAdmin($pdo, $data->admin_id, 'toggle_regra', ['alvo' => $data->nome]);
             echo json_encode(['success' => true]);
             exit;
         }
@@ -46,11 +47,13 @@ if ($method === 'POST') {
             $sql = "UPDATE regras_modelos SET nome = ?, regras = ? WHERE id = ?";
             $stmt = $pdo->prepare($sql);
             $stmt->execute([$data->nome, $regrasJSON, $data->id]);
+            logAdmin($pdo, $data->admin_id, 'atualizar_regra', ['alvo' => $data->nome]);
         } else {
             // Cria Novo
             $sql = "INSERT INTO regras_modelos ( nome, regras, ativo) VALUES ( ?, ?, 1)";
             $stmt = $pdo->prepare($sql);
             $stmt->execute([$data->nome, $regrasJSON]);
+            logAdmin($pdo, $data->admin_id, 'criar_regra', ['alvo' => $data->nome]);
         }
 
         echo json_encode(['success' => true]);

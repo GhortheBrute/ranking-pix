@@ -1,9 +1,12 @@
 <?php
 // api/usuarios.php
+session_start();
 header("Content-Type: application/json; charset=UTF-8");
 require 'config.php';
 
 $method = $_SERVER['REQUEST_METHOD'];
+$admin_id = $_SESSION['admin_id'] ?? 0;
+$role = $_SESSION['role'] ?? 'user';
 
 // 1. LISTAR USUÁRIOS (GET)
 if ($method === 'GET') {
@@ -21,6 +24,12 @@ if ($method === 'POST') {
     if (!$data) {
         http_response_code(400);
         echo json_encode(['sucesso' => false, 'erro' => 'Dados inválidos']);
+        exit;
+    }
+    echo json_encode(['role' => $_SESSION['role'], 'id' => $_SESSION['admin_id']]);
+    if ($role !== 'admin'){
+        http_response_code(400);
+        echo json_encode(['sucesso'=> false, 'erro'=> 'Usuário não possui permissão para realizar esta ação.']);
         exit;
     }
 
@@ -42,17 +51,18 @@ if ($method === 'POST') {
                 $stmt = $pdo->prepare($sql);
                 $stmt->execute([$data->role, $data->id]);
             }
-        } 
-        // --- Ação: CRIAR (INSERT) ---
-        else {
+            logAdmin($pdo, $admin_id, 'atualizar_usuario', ['alvo' => $data->username]);
+        } else {
+            // --- Ação: CRIAR (INSERT) ---
             if (empty($data->password)) {
                 throw new Exception("A senha é obrigatória para novos usuários.");
             }
             
-            $sql = "INSERT INTO usuarios (username, password, role, ativo) VALUES (?, ?, ?, 1)";
+            $sql = "INSERT INTO usuarios (username, password, role) VALUES (?, ?, ?)";
             $stmt = $pdo->prepare($sql);
             // CRÍTICO: Usar password_hash
             $stmt->execute([$data->username, $data->password, $data->role]);
+            logAdmin($pdo, $admin_id, 'criar_usuario', ['alvo' => $data->username]);
         }
 
         echo json_encode(['sucesso' => true]);
@@ -60,7 +70,7 @@ if ($method === 'POST') {
     } catch (PDOException $e) {
         // Erro comum: Username duplicada (código 23000)
         if ($e->getCode() == 23000) {
-            echo json_encode(['sucesso' => false, 'erro' => 'Este username já está cadastrado.']);
+            echo json_encode(['sucesso' => false, 'erro' => 'Username já cadastrado.']);
         } else {
             echo json_encode(['sucesso' => false, 'erro' => $e->getMessage()]);
         }

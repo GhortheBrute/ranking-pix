@@ -15,6 +15,12 @@ $options = [
     PDO::ATTR_EMULATE_PREPARES => false,
 ];
 
+function logAdmin($pdo, $admin_id, $acao, $detalhes) {
+    $stmt = $pdo->prepare("INSERT INTO logs (usuario_id, acao, detalhes, ip) VALUES (?, ?, ?, ?)");
+    $ip = $_SERVER['REMOTE_ADDR'];
+    $stmt->execute([$admin_id, $acao, json_encode($detalhes), $ip]);
+}
+
 try{
     $pdo = new PDO($dsn, $user, $pass, $options);
 } catch (PDOException $e) {

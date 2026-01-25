@@ -30,6 +30,7 @@ if ($method === 'POST') {
             $sql = "UPDATE operadores SET valido = NOT valido WHERE matricula = ?";
             $stmt = $pdo->prepare($sql);
             $stmt->execute([$data->matricula]);
+            logAdmin($pdo, $data->admin_id, 'toggle_operador', ['alvo' => $data->nome]);
             echo json_encode(['sucesso' => true]);
             exit;
         }
@@ -41,11 +42,13 @@ if ($method === 'POST') {
             $sql = "UPDATE operadores SET nome = ?, apelido = ? WHERE matricula = ?";
             $stmt = $pdo->prepare($sql);
             $stmt->execute([$data->nome, $data->apelido, $data->matricula]);
+            logAdmin($pdo, $data->admin_id, 'atualizar_operador', ['alvo' => $data->nome]);
         } else {
             // Cria Novo (Matrícula deve ser única)
             $sql = "INSERT INTO operadores (matricula, nome, apelido, valido) VALUES (?, ?, ?, 1)";
             $stmt = $pdo->prepare($sql);
             $stmt->execute([$data->matricula, $data->nome, $data->apelido]);
+            logAdmin($pdo, $data->admin_id, 'criar_operador', ['alvo' => $data->nome]);
         }
 
         echo json_encode(['sucesso' => true]);
