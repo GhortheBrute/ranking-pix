@@ -6,7 +6,14 @@ require 'config.php';
 
 $method = $_SERVER['REQUEST_METHOD'];
 $admin_id = $_SESSION['admin_id'] ?? 0;
-$role = $_SESSION['role'] ?? 'user';
+
+
+//$debug_sessao = [
+//    'session_id_atual' => session_id(),
+//    'tem_admin_id' => isset($_SESSION['admin_id']),
+//    'valor_role' => $_SESSION['role'] ?? 'NÃO DEFINIDO',
+//    'valor_variavel_role' => $role
+//];
 
 // 1. LISTAR USUÁRIOS (GET)
 if ($method === 'GET') {
@@ -26,10 +33,13 @@ if ($method === 'POST') {
         echo json_encode(['sucesso' => false, 'erro' => 'Dados inválidos']);
         exit;
     }
-    echo json_encode(['role' => $_SESSION['role'], 'id' => $_SESSION['admin_id']]);
-    if ($role !== 'admin'){
+    if ($_SESSION['role'] !== 'admin'){
         http_response_code(400);
-        echo json_encode(['sucesso'=> false, 'erro'=> 'Usuário não possui permissão para realizar esta ação.']);
+        echo json_encode([
+            'sucesso'=> false,
+            'erro'=> 'Usuário não possui permissão para realizar esta ação.',
+            'debug'=> $debug_sessao
+        ]);
         exit;
     }
 

@@ -32,7 +32,12 @@ if ($acao === 'login' && $method === 'POST') {
             unset($user['password']); // Nunca devolva o hash para o frontend
             $_SESSION['admin_id'] = $user['id'];
             $_SESSION['role'] = $user['role'];
-            echo json_encode(['sucesso' => true, 'usuario' => $user]);
+            session_write_close();
+            echo json_encode([
+                'sucesso' => true,
+                'usuario' => $user,
+                'session_id_login' => session_id(),
+            ]);
             exit;
         }
     }

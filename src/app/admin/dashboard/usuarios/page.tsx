@@ -41,7 +41,7 @@ export default function UsersPage() {
     }, []);
 
     const handleOpenCreate = () => {
-        setFormData({ id: 0, username: '', password: '', role: 'user' });
+        setFormData({ id: 0, nome: '', password: '', role: 'user' });
         setIsEditing(false);
         setIsModalOpen(true);
     };
@@ -49,7 +49,7 @@ export default function UsersPage() {
     const handleOpenEdit = (user: Usuario) => {
         setFormData({
             id: user.id,
-            username: user.username,
+            nome: user.username,
             password: '', // IMPORTANTE: Começa vazio. Só envia se quiser trocar.
             role: user.role || 'user'
         });
@@ -176,7 +176,7 @@ export default function UsersPage() {
                                     required
                                     className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 outline-none"
                                     value={formData.username}
-                                    onChange={e => setFormData({...formData, username: e.target.value})}
+                                    onChange={e => setFormData({...formData, nome: e.target.value})}
                                 />
                             </div>
 

@@ -80,17 +80,18 @@ CREATE TABLE torneios (
 -- 7. Tabela de Pesquisa
 create table rank_pesquisa (
                             id INT PRIMARY KEY AUTO_INCREMENT,
-                            torneio INT NOT NULL,
+                            torneio_id INT NOT NULL,
                             operador int NOT NULL,
                             qtd_pesquisa int NOT NULL DEFAULT 0,
+                            criado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
                             CONSTRAINT fk_pesquisa_torneio
-                                    FOREIGN KEY (torneio)
+                                    FOREIGN KEY (torneio_id)
                                     REFERENCES torneios (id)
                                     ON DELETE CASCADE ,
                             CONSTRAINT fk_pesquisa_operador
                                     FOREIGN KEY (operador)
                                     REFERENCES operadores(matricula),
-                            UNIQUE KEY unique_pesquisa_torneio (torneio, operador)
+                            UNIQUE KEY unique_pesquisa_torneio (torneio_id, operador)
 );
 
 -- 8. Tabela de Cache
@@ -104,3 +105,14 @@ CREATE TABLE ranking_cache (
                                        ON DELETE CASCADE
 );
 
+CREATE TABLE logs (
+                            id INT PRIMARY KEY AUTO_INCREMENT,
+                            data TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                            usuario_id INT NOT NULL,
+                            acao VARCHAR(50) NOT NULL,
+                            detalhes TEXT NOT NULL,
+                            ip VARCHAR(15) NOT NULL,
+                            CONSTRAINT fk_logs_usuarios
+                                    FOREIGN KEY (usuario_id)
+                                    REFERENCES usuarios(id)
+);
