@@ -165,12 +165,6 @@ export default function PesquisasPage() {
         }
     };
 
-    function SelecAllInput() {
-        const handleFocus = (event) => {
-            event.target.select();
-        }
-    }
-
     // --- VIEW: LISTA DE TORNEIOS ---
     if (view === 'list') {
         return (

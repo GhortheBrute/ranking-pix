@@ -48,7 +48,7 @@ export default function LogsPage() {
         if (a.includes('delete') || a.includes('excluir') || a.includes('inativar')) return 'bg-red-100 text-red-700';
         if (a.includes('update') || a.includes('editar') || a.includes('alterar')) return 'bg-blue-100 text-blue-700';
         if (a.includes('create') || a.includes('criar') || a.includes('novo')) return 'bg-green-100 text-green-700';
-        if (a.includes('pesquisa')) return 'bg-orange-100 text-orange-100';
+        if (a.includes('pesquisas')) return 'bg-orange-100 text-slate-600';
         if (a.includes('torneio')) return 'bg-gray-100 text-white';
         return 'bg-gray-100 text-gray-700'; // Padrão
     };

@@ -1,4 +1,5 @@
 <?php
+session_start();
 header("Content-Type: application/json; charset=UTF-8");
 require 'config.php';
 
@@ -47,28 +48,27 @@ if ($method === 'POST') {
         if (isset($data->is_edit) && $data->is_edit === true) {
             // Atualiza Nome e Apelido
             $sql = "UPDATE torneios 
-                    SET nome = ?, data_inicio=?, data_fim=?, regras_id = ? 
+                    SET nome = ?, data_inicio=?, data_fim=?, regra_id = ? 
                     WHERE id = ?";
             $stmt = $pdo->prepare($sql);
             $stmt->execute([
                 $data->nome,
                 $data->data_inicio,
                 $data->data_fim,
-                $data->regras_id,
-                $data->id
+                $data->regra_id
             ]);
-            logAdmin($pdo, $data->admin_id, 'atualizar_torneio', ['alvo' => $data->nome]);
+            logAdmin($pdo, $_SESSION['admin_id'], 'atualizar_torneio', ['alvo' => $data->nome]);
         } else {
             // Cria Novo
-            $sql = "INSERT INTO torneios ( nome, data_inicio, data_fim, regras_id) VALUES ( ?, ?, ?, ?)";
+            $sql = "INSERT INTO torneios ( nome, data_inicio, data_fim, regra_id) VALUES ( ?, ?, ?, ?)";
             $stmt = $pdo->prepare($sql);
             $stmt->execute([
                 $data->nome,
                 $data->data_inicio,
                 $data->data_fim,
-                $data->regras_id
+                $data->regra_id
             ]);
-            logAdmin($pdo, $data->admin_id, 'criar_torneio', ['alvo' => $data->nome]);
+            logAdmin($pdo, $_SESSION['admin_id'], 'criar_torneio', ['alvo' => $data->nome]);
         }
 
         echo json_encode(['success' => true]);

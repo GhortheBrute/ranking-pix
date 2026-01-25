@@ -122,7 +122,7 @@ if ($method === 'POST') {
         }
 
         $admin_id = $_SESSION['admin_id'] ?? 0;
-        logAdmin($pdo, $admin_id, 'atualizar_pesquisas', "Torneio ID: $torneio_id");
+        logAdmin($pdo, $admin_id, 'atualizar_pesquisas', ["ID" => $torneio_id ]);
 
         $pdo->commit();
         echo json_encode(['sucesso' => true]);
