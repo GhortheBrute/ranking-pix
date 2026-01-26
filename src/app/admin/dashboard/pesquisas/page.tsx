@@ -1,26 +1,11 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Trash2, Save, Search, Trophy } from 'lucide-react';
+import {ArrowLeft, Trash2, Save, Search, Trophy, Check, ChevronsUpDown} from 'lucide-react';
+import {ItemPesquisa, Operador, OperadorSimples, Torneio} from "@/types";
+import { fetchTorneiosPesquisa, fetchDetalhesPesquisa, savePesquisas } from "@/services/api";
+import { Combobox, ComboboxButton, ComboboxInput, ComboboxOption, ComboboxOptions } from '@headlessui/react'
 
-// Tipos
-interface Torneio {
-    id: number;
-    nome: string;
-    data_inicio: string;
-    data_fim: string;
-}
-
-interface Operador {
-    matricula: number;
-    nome: string;
-}
-
-interface ItemPesquisa {
-    matricula: number;
-    nome: string; // Para exibição
-    quantidade: number;
-}
 
 export default function PesquisasPage() {
     // --- ESTADOS GERAIS ---
@@ -33,9 +18,10 @@ export default function PesquisasPage() {
 
     // --- ESTADOS DO FORMULÁRIO ---
     const [torneioSelecionado, setTorneioSelecionado] = useState<Torneio | null>(null);
-    const [listaOperadores, setListaOperadores] = useState<Operador[]>([]); // Todos os disponíveis
+    const [listaOperadores, setListaOperadores] = useState<OperadorSimples[]>([]); // Todos os disponíveis
     const [itens, setItens] = useState<ItemPesquisa[]>([]); // Os lançados na tela
-    const [novoOperadorInput, setNovoOperadorInput] = useState(''); // O texto do dropdown
+    const [query, setQuery] = useState('');
+    const [selectedOperador, setSelectedOperador] = useState<OperadorSimples | null>(null);
 
     // 1. Carregar Torneios ao abrir
     useEffect(() => {
@@ -45,8 +31,7 @@ export default function PesquisasPage() {
     const carregarTorneios = async () => {
         setLoading(true);
         try {
-            const res = await fetch('/api/pesquisas.php');
-            const data = await res.json();
+            const data = await fetchTorneiosPesquisa();
             setTorneioVigente(data.vigente);
             setOutrosTorneios(data.outros);
         } catch (error) {
@@ -60,14 +45,13 @@ export default function PesquisasPage() {
     const handleSelectTorneio = async (torneio: Torneio) => {
         setLoading(true);
         try {
-            const res = await fetch(`/api/pesquisas.php?torneio_id=${torneio.id}`);
-            const data = await res.json();
+            const data = await fetchDetalhesPesquisa(torneio.id);
 
             setTorneioSelecionado(data.torneio);
             setListaOperadores(data.operadores);
 
             // Mapeia o retorno do banco para o formato do front
-            const itensFormatados = data.lancamentos.map((l: any) => ({
+            const itensFormatados: ItemPesquisa[] = data.lancamentos.map((l: any) => ({
                 matricula: l.matricula,
                 nome: l.nome,
                 quantidade: Number(l.quantidade)
@@ -84,41 +68,30 @@ export default function PesquisasPage() {
 
     // 3. Adicionar Operador (Transforma Dropdown em Linha)
     const handleAddOperador = () => {
-        // Acha o operador baseando-se no texto "NOME - #ID" ou apenas pelo nome se for único
-        // Logica para extrair o ID do texto do datalist (Ex: "Joao - #15")
-        const match = novoOperadorInput.match(/#(\d+)$/);
-
-        let operadorId = 0;
-        let operadorNome = '';
-
-        if (match) {
-            operadorId = parseInt(match[1]);
-            const op = listaOperadores.find(o => o.matricula === operadorId);
-            if (op) operadorNome = op.nome;
-        } else {
-            // Tenta achar só pelo nome exato (caso o usuário não digite o ID)
-            const op = listaOperadores.find(o => o.nome.toLowerCase() === novoOperadorInput.toLowerCase());
-            if (op) {
-                operadorId = op.matricula;
-                operadorNome = op.nome;
-            }
-        }
-
-        if (!operadorId || !operadorNome) {
-            alert('Operador inválido ou não encontrado. Selecione na lista.');
+        // Validação simples
+        if (!selectedOperador) {
+            alert('Por favor, selecione um operador da lista.');
             return;
         }
 
-        // Verifica duplicidade
-        if (itens.some(i => i.matricula === operadorId)) {
+        // Verifica duplicidade usando a matrícula
+        if (itens.some(i => i.matricula === selectedOperador.matricula)) {
             alert('Este operador já está na lista.');
-            setNovoOperadorInput('');
+            setQuery('');
+            setSelectedOperador(null);
             return;
         }
 
-        // Adiciona na lista
-        setItens([...itens, { matricula: operadorId, nome: operadorNome, quantidade: 0 }]);
-        setNovoOperadorInput(''); // Limpa o dropdown
+        // Adiciona na Lista
+        setItens([...itens, {
+            matricula: selectedOperador.matricula,
+            nome: selectedOperador.nome,
+            quantidade: 0
+        }]);
+
+        // Limpa o estado para a próxima inserção
+        setSelectedOperador(null);
+        setQuery('');
     };
 
     // 4. Alterar Quantidade
@@ -145,11 +118,7 @@ export default function PesquisasPage() {
                 itens: itens
             };
 
-            const res = await fetch('/api/pesquisas.php', {
-                method: 'POST',
-                body: JSON.stringify(payload)
-            });
-            const data = await res.json();
+            const data = await savePesquisas(torneioSelecionado.id, itens);
 
             if (data.sucesso) {
                 alert('Dados salvos com sucesso!');
@@ -164,6 +133,15 @@ export default function PesquisasPage() {
             setLoading(false);
         }
     };
+
+    const filteredOperadores =
+        query === ''
+            ? listaOperadores.filter(op => !itens.some(i => i.matricula == op.matricula))
+            : listaOperadores.filter((op) => {
+                const notSelected = !itens.some(i => i.matricula === op.matricula);
+                const matchesQuery = op.nome.toLowerCase().includes(query.toLowerCase());
+                return notSelected && matchesQuery;
+            })
 
     // --- VIEW: LISTA DE TORNEIOS ---
     if (view === 'list') {
@@ -246,7 +224,7 @@ export default function PesquisasPage() {
                 </div>
             </div>
 
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200">
                 {/* LISTAGEM (As linhas que viram colunas) */}
                 <div className="divide-y divide-gray-100">
                     {itens.map((item, index) => (
@@ -289,35 +267,72 @@ export default function PesquisasPage() {
                     )}
                 </div>
 
-                {/* AREA DE ADICIONAR (Dropdown estilo Google Keep) */}
+                {/* AREA DE ADICIONAR (Headless UI Combobox) */}
                 <div className="bg-slate-50 p-4 border-t border-gray-200">
                     <label className="text-xs font-bold text-slate-500 uppercase mb-2 block">Adicionar Operador</label>
                     <div className="flex gap-2">
+
+                        {/* O Combobox substitui o input antigo */}
                         <div className="relative flex-1">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                            <input
-                                list="operadores-list"
-                                type="text"
-                                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                                placeholder="Digite para buscar nome..."
-                                value={novoOperadorInput}
-                                onChange={(e) => setNovoOperadorInput(e.target.value)}
-                                onKeyDown={(e) => {
-                                    if (e.key === 'Enter') handleAddOperador();
-                                }}
-                                // Quando perder o foco ou clicar numa opção do datalist, tenta adicionar?
-                                // Melhor deixar só no Enter ou botão para evitar UX ruim de adicionar sem querer.
-                            />
-                            {/* DATALIST NATIVO (Funciona como um select pesquisável) */}
-                            <datalist id="operadores-list">
-                                {listaOperadores
-                                    // Filtra quem já está na lista para não mostrar duplicado
-                                    .filter(op => !itens.some(i => i.matricula === op.matricula))
-                                    .map(op => (
-                                        <option key={op.matricula} value={`${op.nome} - #${op.matricula}`} />
-                                    ))}
-                            </datalist>
+                            <Combobox
+                                immediate={true}
+                                value={selectedOperador}
+                                onChange={setSelectedOperador}
+                                onClose={() => setQuery('')} // Limpa a query ao fechar/selecionar
+                            >
+                                <div className="relative w-full cursor-default overflow-hidden rounded-lg bg-white text-left border border-gray-300 focus-within:ring-2 focus-within:ring-blue-500 sm:text-sm">
+                                    <ComboboxInput
+                                        className="w-full border-none py-2 pl-3 pr-10 text-sm leading-5 text-gray-900 focus:ring-0 outline-none"
+                                        displayValue={(op: OperadorSimples) => op?.nome}
+                                        onChange={(event) => setQuery(event.target.value)}
+                                        placeholder="Digita para buscar..."
+                                    />
+                                    <ComboboxButton className="absolute inset-y-0 right-0 flex items-center pr-2">
+                                        <ChevronsUpDown className="h-5 w-5 text-gray-400" aria-hidden="true" />
+                                    </ComboboxButton>
+                                </div>
+
+                                <ComboboxOptions className="absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm z-50">
+                                    {filteredOperadores.length === 0 && query !== '' ? (
+                                        <div className="relative cursor-default select-none py-2 px-4 text-gray-700">
+                                            Nenhum operador encontrado.
+                                        </div>
+                                    ) : (
+                                        filteredOperadores.slice(0,100).map((op) => (
+                                            <ComboboxOption
+                                                key={op.matricula}
+                                                className={({ active}) =>
+                                                    `relative cursor-default select-none py-2 pl-10 pr-4 ${
+                                                        active ? 'bg-blue-600 text-white' : 'text-gray-900'
+                                                    }`
+                                                }
+                                                value={op}
+                                            >
+                                                {({ selected, active }) => (
+                                                    <>
+                                                        <span className={`block truncate ${selected ? 'font-medium' : 'font-normal'}`}>
+                                                            {op.nome}
+                                                        </span>
+                                                        {/* Mostra a matrícula discretamente à direita */}
+                                                        <span className={`absolute inset-y-0 right-0 flex items-center pr-4 text-xs ${active ? 'text-blue-100' : 'text-gray-400'}`}>
+                                                            #{op.matricula}
+                                                        </span>
+
+                                                        {/* Ícone de check se estiver selecionado */}
+                                                        {selected ? (
+                                                            <span className={`absolute inset-y-0 left-0 flex items-center pl-3 ${active ? 'text-white' : 'text-blue-600'}`}>
+                                                                <Check className="h-5 w-5" aria-hidden="true" />
+                                                            </span>
+                                                        ) : null}
+                                                    </>
+                                                )}
+                                            </ComboboxOption>
+                                        ))
+                                    )}
+                                </ComboboxOptions>
+                            </Combobox>
                         </div>
+
                         <button
                             onClick={handleAddOperador}
                             className="bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-2 rounded-lg font-medium transition"

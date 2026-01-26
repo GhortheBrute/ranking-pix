@@ -20,3 +20,20 @@ export interface RankingResponse {
   };
   data: Operador[];
 }
+
+export  interface Torneio {
+    id: number;
+    nome: string;
+    data_inicio: string;
+    data_fim: string;
+    ativo?: boolean;
+}
+
+export interface OperadorSimples {
+    matricula: number;
+    nome: string;
+}
+
+export interface ItemPesquisa extends OperadorSimples {
+    quantidade: number;
+}
