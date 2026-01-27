@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
-import {ItemPesquisa, OperadorSimples, Torneio} from "@/types";
+import {ItemPesquisa, LancamentosBackend, OperadorSimples, Torneio} from "@/types";
 import {fetchDetalhesPesquisa, fetchTorneiosPesquisa, savePesquisas} from "@/services/api";
-import {find} from "eslint-config-next";
 
 export function usePesquisaController() {
     // Estados
@@ -18,7 +17,7 @@ export function usePesquisaController() {
     const [listaOperadores, setListaOperadores] = useState<OperadorSimples[]>([]);
     const [selectedOperador, setSelectedOperador] = useState<OperadorSimples | null>(null);
 
-    useEffect(() => void carregarTorneios(), []);
+    useEffect(() => {void carregarTorneios()}, []);
 
     const carregarTorneios = async () => {
         setLoading(true);
@@ -42,7 +41,7 @@ export function usePesquisaController() {
             setSelectedTorneio(data.torneio);
             setListaOperadores(data.operadores);
 
-            const itensFormatados: ItemPesquisa[] = data.lancamentos.map((l: any) => ({
+            const itensFormatados: ItemPesquisa[] = data.lancamentos.map((l: LancamentosBackend) => ({
                 matricula: l.matricula,
                 nome: l.nome,
                 quantidade: Number(l.quantidade)
@@ -106,6 +105,24 @@ export function usePesquisaController() {
         }
     };
 
+    const handleBack = () => {
+        setView('list');
+    }
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            window.scrollTo(0, 0);
+
+            const mainContainer = document.querySelector('main') || document.querySelector('.overflow-y-auto');
+
+            if (mainContainer) {
+                mainContainer.scrollTo(0, 0);
+            }
+        }, 50);
+
+        return () => clearTimeout(timer);
+    }, [view]);
+
     return {
         view,
         setView,
@@ -122,6 +139,6 @@ export function usePesquisaController() {
         handleUpdateQuantidade,
         handleRemoveOperador,
         handleSave,
-        handleBack: () => setView('list')
+        handleBack
     }
 }
