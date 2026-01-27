@@ -110,7 +110,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 `}
             >
                 <div className="p-4 border-b border-slate-700 flex items-center justify-between">
-                    {sidebarOpen && <span className="font-bold text-xl text-blue-400">SuperAdmin</span>}
+                    {sidebarOpen && <span className="font-bold text-xl text-blue-400">Painel Administrativo</span>}
                     <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-1 hover:bg-slate-800 rounded">
                         <Menu size={20} />
                     </button>
