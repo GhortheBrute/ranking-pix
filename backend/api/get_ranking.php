@@ -1,80 +1,125 @@
 <?php
 require_once './config.php';
-ob_start("ob_gzhandler");
+// Removemos o ob_gzhandler por enquanto para evitar conflitos de buffer em alguns servidores,
+// mas pode manter se o seu servidor suportar bem.
+header('Content-Type: application/json');
 
-// Parâmetros via GET (ex: ?inicio=2023-10-01&fim=2023-10-31)
-$inicio = $_GET['inicio'] ?? date('Y-m-01'); // Padrão dia 1 do mês atual
-$fim = $_GET['fim'] ?? date('Y-m-t'); // Padrão último dia do mês atual
-
-try{
-    // Array mestre que armazena os dados consolidados
+try {
     $ranking = [];
+    
+    // 1. Validar o ID do Torneio
+    $torneioId = $_GET['torneio_id'] ?? null;
 
-    // Total de PIX
-    $sqlPix = "SELECT
+    if (!$torneioId) {
+        throw new Exception("ID do torneio é obrigatório.");
+    }
+
+    // 2. Buscar dados do Torneio (Datas e Tipo)
+    $sqlTorneio = "SELECT tipo, data_inicio, data_fim FROM torneios WHERE id = :id";
+    $stmtTorneio = $pdo->prepare($sqlTorneio);
+    $stmtTorneio->execute([':id' => $torneioId]);
+    $torneio = $stmtTorneio->fetch(PDO::FETCH_ASSOC);
+
+    if (!$torneio) {
+        throw new Exception("Torneio não encontrado.");
+    }
+
+    $inicio = $torneio['data_inicio'];
+    $fim    = $torneio['data_fim'];
+    $tipo   = $torneio['tipo']; // 'LOCAL' ou 'MATRIZ'
+
+    // 3. Buscar PIX (Base de tudo - Traz todos os operadores válidos)
+    // A query de PIX usa as datas do torneio para filtrar as transações
+    $sqlPix = "SELECT 
                     o.matricula, o.nome, o.apelido,
                     COUNT(rp.transacao) as total_qtd_pix,
                     SUM(rp.valor_pix) as total_valor_pix
                 FROM operadores o
-                LEFT JOIN rank_pix rp ON o.matricula = rp.operador
+                LEFT JOIN rank_pix rp ON o.matricula = rp.operador 
                     AND rp.data BETWEEN :inicio AND :fim
                 WHERE o.valido = 1
-                GROUP BY o.matricula
-    ";
+                GROUP BY o.matricula";
 
     $stmtPix = $pdo->prepare($sqlPix);
     $stmtPix->execute([':inicio' => $inicio, ':fim' => $fim]);
 
-    while($row = $stmtPix->fetch()) {
+    while ($row = $stmtPix->fetch(PDO::FETCH_ASSOC)) {
         $id = $row['matricula'];
         $ranking[$id] = [
             'matricula' => $id,
-            'nome' => $row['apelido'] ?: $row['nome'],
-            'pix' => [
-                'qtd' => $row['total_qtd_pix'],
-                'valor' => $row['total_valor_pix']
+            'nome'      => $row['apelido'] ?: $row['nome'],
+            'pix'       => [
+                'qtd'   => (int)$row['total_qtd_pix'],
+                // Se for nulo (sem pix), retorna 0
+                'valor' => (float)($row['total_valor_pix'] ?? 0)
             ],
-            'recarga' => [
-                'qtd' => 0,
-                'valor' => 0.00
-            ],
-            'pontuacao_geral' => 0
+            // Valores padrão (serão preenchidos apenas se for LOCAL)
+            'recarga'   => ['qtd' => 0, 'valor' => 0],
+            'pesquisas' => 0,
+            'pontos'    => 0 // O front vai calcular, mas deixamos a chave aqui
         ];
     }
 
-    // Busca o total de Recarga e mescla no array existente
-    $sqlRecarga = "SELECT
-                        operador,
-                        SUM(qtd_recarga) as total_qtd_recarga,
-                        SUM(valor_recarga) as total_valor_recarga
-                    FROM rank_recarga
-                    WHERE data BETWEEN :inicio AND :fim
-                    GROUP BY operador
-    ";
+    // 4. Se for Torneio LOCAL, busca Recargas e Pesquisas
+    if ($tipo === 'LOCAL') {
+        
+        // --- RECARGAS ---
+        $sqlRecarga = "SELECT 
+                            operador, 
+                            SUM(qtd_recarga) as total_qtd, 
+                            SUM(valor_recarga) as total_valor
+                       FROM rank_recarga
+                       WHERE data BETWEEN :inicio AND :fim
+                       GROUP BY operador";
+        
+        $stmtRecarga = $pdo->prepare($sqlRecarga);
+        $stmtRecarga->execute([':inicio' => $inicio, ':fim' => $fim]);
 
-    $stmtRecarga = $pdo->prepare(($sqlRecarga));
-    $stmtRecarga->execute([':inicio' => $inicio, ':fim' => $fim]);
+        while ($row = $stmtRecarga->fetch(PDO::FETCH_ASSOC)) {
+            $id = $row['operador'];
+            if (isset($ranking[$id])) {
+                $ranking[$id]['recarga']['qtd']   = (int)$row['total_qtd'];
+                $ranking[$id]['recarga']['valor'] = (float)$row['total_valor'];
+            }
+        }
 
-    while($row = $stmtRecarga->fetch()) {
-        $id = $row['operador'];
-        if (isset($ranking[$id])) {
-            $ranking[$id]['recarga']['qtd'] = (int)$row['total_qtd_recarga'];
-            $ranking[$id]['recarga']['valor'] = (float)$row['total_valor_recarga'];
+        // --- PESQUISAS ---
+        // Aqui aplicamos a lógica que você pediu:
+        // Sem SUM(), pois a chave (torneio, operador) é única.
+        $sqlPesquisa = "SELECT operador, quantidade 
+                        FROM rank_pesquisa 
+                        WHERE torneio_id = :id";
+        
+        $stmtPesquisa = $pdo->prepare($sqlPesquisa);
+        $stmtPesquisa->execute([':id' => $torneioId]);
+
+        while ($row = $stmtPesquisa->fetch(PDO::FETCH_ASSOC)) {
+            $id = $row['operador'];
+            if (isset($ranking[$id])) {
+                $ranking[$id]['pesquisas'] = (int)$row['quantidade'];
+            }
         }
     }
 
-    // Transforma o array associativo em uma lista indexada para o JSON
+    // 5. Preparar Resposta
     $listaFinal = array_values($ranking);
 
-    // Ordena por maior quantidade de PIX
+    // Ordenação padrão pelo PIX (Qtd) para já vir bonitinho, 
+    // mas o Front pode reordenar depois pelos Pontos.
     usort($listaFinal, function ($a, $b) {
         return $b['pix']['qtd'] <=> $a['pix']['qtd'];
     });
 
     echo json_encode([
-        "periodo" => ["inicio" => $inicio, "fim" => $fim],
+        "torneio" => [
+            "id" => $torneioId,
+            "tipo" => $tipo,
+            "inicio" => $inicio,
+            "fim" => $fim
+        ],
         "data" => $listaFinal
     ]);
+
 } catch (Exception $e) {
     http_response_code(500);
     echo json_encode(["error" => $e->getMessage()]);

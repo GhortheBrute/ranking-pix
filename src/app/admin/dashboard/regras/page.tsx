@@ -61,6 +61,8 @@ const REGRAS_DEFAULT: RegrasJSON = {
     }
 };
 
+// TODO: implementar regras para pesquisas, utilizando a interface global.
+// TODO: Alterar regra de bônus de fim de semana para data específica.
 export default function RegrasPage() {
     const [modelos, setModelos] = useState<ModeloRegra[]>([]);
     const [loading, setLoading] = useState(true);
