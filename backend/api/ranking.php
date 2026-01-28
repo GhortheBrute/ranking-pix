@@ -12,9 +12,11 @@ $finalResponse = [
 try {
     $hoje = date('Y-m-d');
     // 2. Busca TODOS os torneios ativos hoje (sem LIMIT)
-    $sqlTorneios = "SELECT id, nome, tipo, data_inicio, data_fim 
-                    FROM torneios 
-                    WHERE data_inicio <= :inicio AND data_fim >= :fim";
+    $sqlTorneios = "SELECT t.id, t.nome, t.tipo, t.data_inicio, t.data_fim,
+                            r.regras AS json_regras
+                    FROM torneios t
+                    LEFT JOIN regras_modelos r ON r.id = t.regra_id
+                    WHERE data_inicio <= :inicio AND data_fim >= :fim AND t.ativo = 1";
 
     $stmtTorneios = $pdo->prepare($sqlTorneios);
     $stmtTorneios->execute([':inicio' => $hoje, ':fim' => $hoje]);
@@ -27,6 +29,9 @@ try {
         $tipoChave = strtolower($torneio['tipo']);
         $inicio = $torneio['data_inicio'];
         $fim    = $torneio['data_fim'];
+
+        // regras
+        $regrasObjeto = $torneio['json_regras'] ? json_decode($torneio['json_regras'], true) : null;
         
         // AQUI entra a lógica de buscar os pontos dos operadores...
         $sqlPix = "SELECT 
@@ -107,7 +112,14 @@ try {
         
         // Monta o objeto para esse tipo
         $finalResponse[$tipoChave] = [
-            'torneio' => $torneio,
+            'torneio' => [
+                'id' => $torneio['id'],
+                'nome' => $torneio['nome'],
+                'tipo' => $torneio['tipo'],
+                'data_inicio' => $torneio['data_inicio'],
+                'data_fim' => $torneio['data_fim'],
+                'regras' => $regrasObjeto
+            ],
             'data' => $listaRanking // A lista final de operadores
         ];
     }

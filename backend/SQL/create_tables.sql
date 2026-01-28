@@ -67,12 +67,12 @@ CREATE TABLE regras_modelos(
 CREATE TABLE torneios (
                           id INT AUTO_INCREMENT PRIMARY KEY,
                           nome VARCHAR(100) NOT NULL,       -- Ex: "Arrancada de Outubro"
+                          tipo ENUM('LOCAL', 'MATRIZ') NOT NULL DEFAULT 'LOCAL',
                           data_inicio DATE NOT NULL,
                           data_fim DATE NOT NULL,
                           regra_id INT NOT NULL,            -- Qual modelo de regras usar
                           ativo TINYINT(1) DEFAULT 1,
                           criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                          tipo ENUM('LOCAL', 'MATRIZ') NOT NULL DEFAULT 'LOCAL',
 
     -- Garante que se apagar a regra, não quebra o torneio (opcional, mas seguro)
                           CONSTRAINT fk_torneio_regra FOREIGN KEY (regra_id) REFERENCES regras_modelos(id)

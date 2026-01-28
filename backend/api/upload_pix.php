@@ -5,12 +5,12 @@ function formatarPDV($codigoOriginal) {
     $codigo = trim($codigoOriginal);
 
     // Regra 1 - PDV - Começa com "UN"
-    if(strpos($codigo, 'UN') === 0) {
+    if(str_starts_with($codigo, 'UN')) {
         $numero = (int)preg_replace('/[^0-9]/', '', $codigo);
         return "PDV $numero";
     }
 
-    if(strpos($codigo, 'SE') === 0) {
+    if(str_starts_with($codigo, 'SE')) {
         $numero = (int)preg_replace('/[^0-9]/', '', $codigo);
 
         if ($numero >= 100) {

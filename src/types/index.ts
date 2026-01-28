@@ -5,20 +5,23 @@ export interface Metrica {
   valor: number;
 }
 
-export interface Operador {
+export interface ItemRanking {
   matricula: number;
   nome: string;
   pix: Metrica;
   recarga: Metrica;
+  pesquisas: number;
   pontuacao_geral: number; // Futuramente calculado pelo PHP ou Front
 }
 
-export interface RankingResponse {
-  periodo: {
-    inicio: string;
-    fim: string;
-  };
-  data: Operador[];
+export interface DadosTorneio {
+  torneio: Torneio;
+  data: ItemRanking[];
+}
+
+export interface HomeRankingResponse {
+    local: DadosTorneio | null;
+    matriz: DadosTorneio | null;
 }
 
 export  interface Torneio {
@@ -28,6 +31,7 @@ export  interface Torneio {
     data_inicio: string;
     data_fim: string;
     ativo?: boolean;
+    regras: RegrasJSON;
 }
 
 export interface OperadorSimples {
