@@ -13,6 +13,7 @@ export default function RankingTable({ dados, tipo, regras }: RankingTableProps)
         // Mapeia adicionando o campo de pontos calculados
         const listaComPontos = dados.map((item) => {
             let pontos = 0;
+            const margem = 0.0001;
 
             if (tipo === 'MATRIZ') {
                 // Regra Matriz: Vale a quantidade de transações únicas
@@ -25,11 +26,11 @@ export default function RankingTable({ dados, tipo, regras }: RankingTableProps)
                 const p = regras?.pontuacao;
 
                 if (p) {
-                    pontos += (item.pix.qtd * p.fator_qtd_pix);
-                    pontos += (item.pix.valor * p.fator_valor_pix);
-                    pontos += (item.recarga.qtd * p.fator_qtd_recarga);
-                    pontos += (item.recarga.valor * p.fator_valor_recarga);
-                    pontos += (item.pesquisas * (p.fator_qtd_pesquisas || 0)); // Garante compatibilidade se o campo for novo
+                    pontos += Math.floor((item.pix.qtd * p.fator_qtd_pix) + margem);
+                    pontos += Math.floor((item.pix.valor * p.fator_valor_pix) + margem);
+                    pontos += Math.floor((item.recarga.qtd * p.fator_qtd_recarga) + margem);
+                    pontos += Math.floor((item.recarga.valor * p.fator_valor_recarga) + margem);
+                    pontos += Math.floor((item.pesquisas * (p.fator_qtd_pesquisas || 0)) + margem); // Garante compatibilidade se o campo for novo
                 } else {
                     // Fallback se não tiver regras carregadas: soma quantidades simples para não ficar zerado
                     pontos = item.pix.qtd + item.recarga.qtd + item.pesquisas;
@@ -61,10 +62,8 @@ export default function RankingTable({ dados, tipo, regras }: RankingTableProps)
         <>
             <Podium top3={top3} tipo={tipo} />
             <div className="animate-fade-in">
-                <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+                <div className="bg-gray-50/95 rounded-2xl shadow-lg p-6 border border-gray-100">
                     <div className="flex flex-col gap-3">
-
-                        
 
                         {/* Barra de Ferramentas / Filtro */}
                         <div className="flex justify-end">
@@ -89,15 +88,16 @@ export default function RankingTable({ dados, tipo, regras }: RankingTableProps)
                             </button>
                         </div>
 
+                        {/* Tabela de dados */}
                         <div className="overflow-hidden bg-white rounded-xl shadow-sm border border-gray-100">
                             <div className="overflow-x-auto">
                                 <table className="w-full text-left border-collapse">
-                                    <thead>
-                                        <tr className="bg-gray-50/50 text-gray-500 text-xs uppercase tracking-wider border-b border-gray-100">
+                                    <thead className="bg-gray-300/50 border-b border-gray-200">
+                                        <tr className=" text-gray-500 text-xs uppercase tracking-wider">
                                             {tipo === 'LOCAL' && <th className="p-4 font-semibold w-16 text-center">#</th>}
                                             <th className="p-4 font-semibold">Operador</th>
 
-                                            <th className="p-4 font-semibold text-right text-blue-600 bg-blue-50/30">
+                                            <th className="p-4 font-semibold text-right text-blue-600">
                                                 <div className="flex items-center justify-end gap-1">
                                                     <TrendingUp size={14} /> PIX (Qtd)
                                                 </div>
@@ -109,16 +109,16 @@ export default function RankingTable({ dados, tipo, regras }: RankingTableProps)
                                                             <DollarSign size={14} /> PIX ($)
                                                         </div>
                                                     </th>
-                                                    <th className="p-4 font-semibold text-right text-orange-600 bg-orange-50/30">
+                                                    <th className="p-4 font-semibold text-right text-orange-600">
                                                         Recargas
                                                     </th>
                                                     <th className="p-4 font-semibold text-right text-gray-400 hidden md:table-cell">
                                                         Rec ($)
                                                     </th>
-                                                    <th className="p-4 font-semibold text-right text-purple-600 bg-purple-50/30">
+                                                    <th className="p-4 font-semibold text-right text-purple-600">
                                                         Pesquisas
                                                     </th>
-                                                    <th className="p-4 font-semibold text-right text-gray-800 bg-gray-100">
+                                                    <th className="p-4 font-semibold text-right text-gray-800">
                                                         <div className="flex items-center justify-end gap-1">
                                                             <Trophy size={14} /> PONTOS
                                                         </div>
@@ -179,8 +179,6 @@ export default function RankingTable({ dados, tipo, regras }: RankingTableProps)
                                                             </td>
                                                         </>
                                                     )}
-
-
                                                 </tr>
                                             );
                                         })}

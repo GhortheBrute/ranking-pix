@@ -1,40 +1,9 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, Save, X, Calculator, Trophy, Gift, Power } from 'lucide-react';
+import { Plus, Edit, Save, X, Calculator, Trophy, Gift, Power } from 'lucide-react';
+import {ModeloRegra, RegrasJSON} from "@/types";
 
-// Tipagem do nosso "Super JSON" de Regras
-interface RegrasJSON {
-    pontuacao: {
-        fator_qtd_pix: number;
-        fator_valor_pix: number;
-        fator_qtd_recarga: number;
-        fator_valor_recarga: number;
-        peso_fds: number;
-    };
-    bonus: {
-        meta_pix_qtd: number;     // Ex: A cada 10 pix
-        meta_pix_valor: number;
-        pontos_bonus_pix_qtd: number; // Ganha 50 pontos
-        pontos_bonus_pix_valor: number; // Ganha 50 pontos
-        meta_recarga_qtd: number;
-        meta_recarga_valor: number; // Ex: A cada R$ 100
-        pontos_bonus_recarga_qtd: number;
-        pontos_bonus_recarga_valor: number;
-    };
-    premios: {
-        ativar_roleta: boolean;
-        pontos_para_roleta: number;
-    };
-}
-
-// Estrutura do Modelo no Banco
-interface ModeloRegra {
-    id: number;
-    nome: string;
-    ativo: number;
-    regras: RegrasJSON | string; // Pode vir como string do banco
-}
 
 // Valor padrão para novos modelos
 const REGRAS_DEFAULT: RegrasJSON = {
@@ -43,7 +12,8 @@ const REGRAS_DEFAULT: RegrasJSON = {
         fator_valor_pix: 0.00,
         fator_qtd_recarga: 0,
         fator_valor_recarga: 15.00,
-        peso_fds: 1
+        peso_fds: 1,
+        fator_qtd_pesquisas: 0
     },
     bonus: {
         meta_pix_qtd: 0,
@@ -53,7 +23,9 @@ const REGRAS_DEFAULT: RegrasJSON = {
         meta_recarga_qtd: 0,
         meta_recarga_valor: 0.00,
         pontos_bonus_recarga_qtd: 0,
-        pontos_bonus_recarga_valor: 0.00
+        pontos_bonus_recarga_valor: 0.00,
+        meta_pesquisa: 0,
+        pontos_bonus_pesquisa: 0
     },
     premios: {
         ativar_roleta: false,
@@ -96,8 +68,6 @@ export default function RegrasPage() {
         }
     };
 
-
-
     useEffect(() => { fetchModelos(); }, []);
 
     // 2. Abrir Modal (Criar ou Editar)
@@ -135,7 +105,7 @@ export default function RegrasPage() {
             const data = await res.json();
 
             if (data.success) {
-                fetchModelos();
+                await fetchModelos();
                 setIsModalOpen(false);
             } else {
                 alert('Erro: ' + data.error);
@@ -152,7 +122,7 @@ export default function RegrasPage() {
             method: 'POST',
             body: JSON.stringify({ acao: 'toggle_status', id })
         });
-        fetchModelos();
+        await fetchModelos();
     };
 
     // Função auxiliar para atualizar o JSON aninhado
@@ -173,6 +143,8 @@ export default function RegrasPage() {
             [section]: { ...prev[section], [field]: value }
         }));
     };
+
+
 
     return (
         <div>

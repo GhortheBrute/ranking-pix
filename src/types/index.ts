@@ -88,3 +88,8 @@ export interface RankingTableProps {
     tipo: 'LOCAL' | 'MATRIZ';
     regras?: RegrasJSON; // Opcional: Se não vier, usamos pesos padrão ou 0
 }
+
+export interface RuleInputProps {
+    value: number;
+    onChange: (value: number) => void;
+}
