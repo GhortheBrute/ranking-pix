@@ -31,7 +31,7 @@ export  interface Torneio {
     data_inicio: string;
     data_fim: string;
     ativo?: boolean;
-    regras: RegrasJSON;
+    regras: RegrasJSON | null;
 }
 
 export interface OperadorSimples {
@@ -81,4 +81,10 @@ export interface ModeloRegra {
     nome: string;
     ativo: number;
     regras: RegrasJSON | string;
+}
+
+export interface RankingTableProps {
+    dados: ItemRanking[];
+    tipo: 'LOCAL' | 'MATRIZ';
+    regras?: RegrasJSON; // Opcional: Se não vier, usamos pesos padrão ou 0
 }

@@ -4,7 +4,7 @@ import {useEffect, useMemo, useState} from 'react';
 import { fetchHomeRanking } from '@/services/api';
 import { HomeRankingResponse } from '@/types';
 import RankingTable from '@/components/RankingTable'; // Supondo que você já tem ou vamos ajustar
-import {Trophy, Globe, MapPin, AlertCircle, LockKeyhole} from 'lucide-react';
+import {Globe, MapPin, AlertCircle, LockKeyhole} from 'lucide-react';
 import Link from "next/link";
 import Podium from "@/components/Podium"; // Ícones opcionais (se tiver lucide-react)
 
@@ -63,9 +63,20 @@ export default function Home() {
         );
     }
 
+    function formatarData(dataISO: string): string {
+        const data = new Date(dataISO + "T00:00:00");
+        return new Intl.DateTimeFormat("pt-BR", {
+            day: "2-digit",
+            month: "long",
+            year: "numeric"
+        }).format(data);
+    }
+
     // Variáveis auxiliares para limpar a lógica do JSX
     const hasLocal = !!data?.local;
     const hasMatriz = !!data?.matriz;
+    const dataInicio = formatarData(data?.local?.torneio.data_inicio);
+    const dataFim = formatarData(data?.local?.torneio.data_fim);
 
     // 1. Caso: Nenhum Torneio Ativo
     if (!hasLocal && !hasMatriz) {
@@ -141,26 +152,17 @@ export default function Home() {
                 {/* VISUALIZAÇÃO LOCAL */}
                 {activeTab === 'local' && hasLocal && data?.local && (
                     <>
-                        <div className="mb-4 flex items-center gap-2 text-blue-800 justify-center">
+                        <div className="flex items-center gap-2 text-blue-800 justify-center">
                             <MapPin className="w-6 h-6" />
-                            <h2 className="text-xl font-bold">Ranking - {data.local.torneio.nome}</h2>
+                            <h2 className="text-xl font-bold">Torneio - {data.local.torneio.nome}</h2>
+                        </div>
+                        <div className='mb-4 flex items-center text-blue-800 justify-center'>
+                            <h3 className="text-xs font-bold">Período de {dataInicio} a {dataFim}</h3>
                         </div>
 
                         {/* PODIUM */}
-                        <Podium top3={top3} tipo={activeTab === 'local' ? 'LOCAL' : 'MATRIZ'} />
-
-                        <div className="animate-fade-in">
-
-                            {/* Aqui passamos os dados para a sua Tabela */}
-                            {/* Dica: Você pode precisar ajustar o componente RankingTable para aceitar o array data.local.data */}
-                            <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-                                {/* Componente de Tabela Existente ou Novo */}
-                                <RankingTable dados={data.local.data} tipo="LOCAL" />
-
-                                {/* Exemplo Rápido de Tabela se ainda não tiver o componente adaptado: */}
-                                {/* <TabelaSimples dados={data.local.data} tipo="LOCAL" /> */}
-                            </div>
-                        </div>
+                        {/* <Podium top3={top3} tipo={activeTab === 'local' ? 'LOCAL' : 'MATRIZ'} /> */}
+                        <RankingTable dados={data.local.data} tipo="LOCAL" regras={data.local.torneio.regras} />
                     </>
                 )}
 

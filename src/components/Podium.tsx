@@ -1,5 +1,5 @@
 import { ItemRanking } from "@/types";
-import { Trophy, Medal, Crown } from "lucide-react";
+import { Medal, Crown } from "lucide-react";
 
 interface PodiumProps {
     top3: ItemRanking[];
@@ -39,10 +39,10 @@ export default function Podium({ top3, tipo }: PodiumProps) {
                     <p className="text-xs md:text-sm font-bold truncate max-w-[90px] md:max-w-[110px] leading-tight">
                         {item.nome}
                     </p>
-                    <p className="text-[10px] md:text-xs opacity-90 mt-1">
+                    <p className="text-[10px] md:text-sm opacity-90 mt-1">
                         {tipo === 'MATRIZ'
                             ? `${item.pix.qtd} transações`
-                            : `${new Intl.NumberFormat('pt-BR').format(item.pontuacao_geral || 0)} pts`
+                            : `${(item.pontuacao_geral).toFixed(0) || 0} pts`
                         }
                     </p>
                 </div>
@@ -56,7 +56,7 @@ export default function Podium({ top3, tipo }: PodiumProps) {
                 {/* 2º Lugar */}
                 {segundo && renderCard(
                     segundo, 2,
-                    "border-gray-300 bg-gray-300",
+                    "border-gray-500 bg-gray-500",
                     "h-24 md:h-32",
                     <Medal className="w-6 h-6 text-gray-400" />
                 )}
@@ -64,7 +64,7 @@ export default function Podium({ top3, tipo }: PodiumProps) {
                 {/* 1º Lugar */}
                 {primeiro && renderCard(
                     primeiro, 1,
-                    "border-yellow-400 bg-yellow-400",
+                    "border-yellow-500 bg-yellow-500",
                     "h-32 md:h-40",
                     <Crown className="w-8 h-8 text-yellow-500 fill-yellow-500" />
                 )}
