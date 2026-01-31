@@ -1,5 +1,7 @@
 // src/types/index.ts
 
+import React from "react";
+
 export interface Metrica {
   qtd: number;
   valor: number;
@@ -84,8 +86,9 @@ export interface RegrasJSON {
 export interface ModeloRegra {
     id: number;
     nome: string;
-    ativo: number;
+    ativo?: number;
     regras: RegrasJSON | string;
+    is_edit?: boolean;
 }
 
 export interface RankingTableProps {
@@ -116,4 +119,26 @@ export interface BonusInputProps {
 export interface DiasEspeciaisInputProps {
     dias: DiaEspecial[];
     onChange: (novosDias: DiaEspecial[]) => void;
+}
+
+export interface RegrasListaProps {
+    modelos: ModeloRegra[];
+    loading: boolean;
+    onEdit: (m: ModeloRegra) => void;
+    onToggle: (id: number) => void;
+}
+
+export interface RegrasModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+    editId: number | null;
+    activeTab: 'financeiro' | 'gamificacao' | 'premios';
+    setActiveTab: (tab: 'financeiro' | 'gamificacao' | 'premios') => void;
+    formName: string;
+    setFormName: (name: string) => void;
+    formRegras: RegrasJSON;
+    setFormRegras: React.Dispatch<React.SetStateAction<RegrasJSON>>;
+    onSave: (e: React.FormEvent) => void;
+    updateRegra: (section: keyof RegrasJSON, field: string, value: number | string) => void;
+    updateBool: (section: keyof RegrasJSON, field: string, value: boolean) => void;
 }

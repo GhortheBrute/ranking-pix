@@ -37,8 +37,24 @@ export async function savePesquisas(torneioId: number, itens: ItemPesquisa[]): P
     return response.json();
 }
 
-export const fetchRegras= async (): Promise<ModeloRegra> => {
+export const fetchRegras= async (): Promise<ModeloRegra[]> => {
     const response = await fetch(`/api/regras.php`);
     if (!response.ok) throw new Error('Falha ao buscar dados do modelo.');
+    return response.json();
+}
+
+export async function saveRegras(payload: ModeloRegra): Promise<{ success: boolean, error?: string }> {
+    const response = await fetch('/api/regras.php', {
+        method: 'POST',
+        body: JSON.stringify(payload)
+    });
+    return response.json();
+}
+
+export async function toggleRegras(acao: string, id: number): Promise<{ success: boolean, error?: string }> {
+    const response = await fetch('/api/regras.php', {
+        method: 'POST',
+        body: JSON.stringify({acao, id})
+    });
     return response.json();
 }

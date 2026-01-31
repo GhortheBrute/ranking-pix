@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from "react";
 import {DiaEspecial, ModeloRegra, RegrasJSON} from "@/types";
-import {fetchRegras} from "@/services/api";
+import {fetchRegras, saveRegras, toggleRegras} from "@/services/api";
 
 const REGRAS_DEFAULT: RegrasJSON = {
     pontuacao: {
@@ -51,7 +51,7 @@ export function useRegras() {
             const data = await fetchRegras();
 
             // Garante que o campo 'regras' seja um objeto, mesmo que venha string do PHP
-            const formatado = data.map((m: any) => ({
+            const formatado = data.map((m: ModeloRegra) => ({
                 ...m,
                 regras: typeof m.regras === 'string' ? JSON.parse(m.regras) : m.regras
             }));
@@ -96,11 +96,7 @@ export function useRegras() {
                 is_edit: !!editId // true se tiver ID
             };
 
-            const res = await fetch('/api/regras.php', {
-                method: 'POST',
-                body: JSON.stringify(payload)
-            });
-            const data = await res.json();
+            const data = await saveRegras(payload);
 
             if (data.success) {
                 await fetchModelos();
@@ -116,10 +112,7 @@ export function useRegras() {
     // 4. Toggle Ativo/Inativo
     const handleToggle = async (id: number) => {
         if (!confirm('Deseja alterar o status deste modelo?')) return;
-        await fetch('/api/regras.php', {
-            method: 'POST',
-            body: JSON.stringify({acao: 'toggle_status', id})
-        });
+        await toggleRegras('toggle_status', id);
         await fetchModelos();
     };
 
@@ -158,7 +151,7 @@ export function useRegras() {
     };
 
     // Função auxiliar para atualizar o JSON aninhado
-    const updateRegra = (section: keyof RegrasJSON, field: string, value: any) => {
+    const updateRegra = (section: keyof RegrasJSON, field: string, value: number | string) => {
         setFormRegras(prev => ({
             ...prev,
             [section]: {

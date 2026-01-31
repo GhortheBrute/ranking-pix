@@ -1,27 +1,8 @@
 // src/components/RuleInput.tsx
 import { RuleInputProps } from '@/types';
+import { getFracaoInicial } from '@/utils/math';
 import React, { useState, useEffect } from 'react';
 
-
-// 1. Funções Auxiliares (Matemática pura)
-function mdc(a: number, b: number): number {
-    return b === 0 ? a : mdc(b, a % b);
-}
-
-function getFracaoInicial(fator: number) {
-    const s = fator.toString();
-    if (!s.includes('.')) return { numerador: fator, denominador: 1 };
-
-    const casas = s.split('.')[1].length;
-    const denominador = Math.pow(10, casas);
-    const numerador = Math.round(fator * denominador);
-    const divisor = mdc(numerador, denominador);
-
-    return {
-        numerador: numerador / divisor,
-        denominador: denominador / divisor,
-    };
-}
 
 export default function RuleInput({
     value, onChange,
