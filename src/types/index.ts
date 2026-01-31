@@ -49,6 +49,11 @@ export interface LancamentosBackend {
   quantidade: string | number;
 }
 
+export interface DiaEspecial {
+    data: string;
+    fator: number;
+}
+
 export interface RegrasJSON {
     pontuacao: {
         fator_qtd_pix: number;
@@ -56,7 +61,7 @@ export interface RegrasJSON {
         fator_qtd_recarga: number;
         fator_valor_recarga: number;
         fator_qtd_pesquisas: number;
-        peso_fds: number;
+        peso_fds: DiaEspecial[];
     };
     bonus: {
         meta_pix_qtd: number;
@@ -91,5 +96,9 @@ export interface RankingTableProps {
 
 export interface RuleInputProps {
     value: number;
-    onChange: (value: number) => void;
+    onChange: (novoFator: number) => void;
+    labelPontos?: string;
+    labelReferencia?: string;
+    min?: number;
+    step?: number;
 }

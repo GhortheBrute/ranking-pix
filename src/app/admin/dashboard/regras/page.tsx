@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { Plus, Edit, Save, X, Calculator, Trophy, Gift, Power } from 'lucide-react';
-import {ModeloRegra, RegrasJSON} from "@/types";
+import {DiaEspecial, ModeloRegra, RegrasJSON} from "@/types";
+import RuleInput from '@/components/RuleInput';
 
 
 // Valor padrão para novos modelos
@@ -12,7 +13,7 @@ const REGRAS_DEFAULT: RegrasJSON = {
         fator_valor_pix: 0.00,
         fator_qtd_recarga: 0,
         fator_valor_recarga: 15.00,
-        peso_fds: 1,
+        peso_fds: [],
         fator_qtd_pesquisas: 0
     },
     bonus: {
@@ -38,6 +39,9 @@ const REGRAS_DEFAULT: RegrasJSON = {
 export default function RegrasPage() {
     const [modelos, setModelos] = useState<ModeloRegra[]>([]);
     const [loading, setLoading] = useState(true);
+
+    const [novoDiaData, setNovoDiaData] = useState('');
+    const [novoDiaFator, setNovoDiaFator] = useState(2); // Padrão dobrado.
 
     // Modal e Edição
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -124,6 +128,26 @@ export default function RegrasPage() {
         });
         await fetchModelos();
     };
+
+    const handleAddDia = () => {
+        if (!novoDiaData) return;
+
+        const novoDia: DiaEspecial = {
+            data: novoDiaData,
+            fator: Number(novoDiaFator)
+        };
+
+        setFormRegras(prev => ({
+            ...prev,
+            pontuacao: {
+                ...prev.pontuacao,
+                dias_especiais: [...(prev.pontuacao.dias_especiais || []), novoDia]
+            }
+        }));
+
+        setNovoDiaData('');
+        setNovoDiaFator(2);
+    }
 
     // Função auxiliar para atualizar o JSON aninhado
     const updateRegra = (section: keyof RegrasJSON, field: string, value: any) => {
@@ -250,14 +274,17 @@ export default function RegrasPage() {
                                         <div className="bg-white p-4 rounded shadow-sm border border-gray-200">
                                             <h4 className="font-bold text-slate-700 mb-4 border-b pb-2">Pix</h4>
                                             <label className="block text-sm text-slate-600 mb-1">Pontos por Quantidade</label>
-                                            <input type="number" step="0.1" className="w-full p-2 border rounded mb-3"
+                                            <RuleInput
                                                 value={formRegras.pontuacao.fator_qtd_pix}
-                                                onChange={e => updateRegra('pontuacao', 'fator_qtd_pix', e.target.value)}
+                                                onChange={(novoFator) => updateRegra('pontuacao', 'fator_qtd_pix', novoFator)}
+                                                labelReferencia='PIX'
                                             />
                                             <label className="block text-sm text-slate-600 mb-1">Pontos por Valor(R$)</label>
-                                            <input type="number" step="10" min="0" className="w-full p-2 border rounded mb-3"
-                                                value={formRegras.pontuacao.fator_valor_pix.toFixed(2)}
-                                                onChange={e => updateRegra('pontuacao', 'fator_valor_pix', e.target.value)}
+                                            <RuleInput 
+                                                value={formRegras.pontuacao.fator_valor_pix}
+                                                onChange={(novoFator) => updateRegra('pontuacao', 'fator_valor_pix', novoFator)}
+                                                labelReferencia='Reais (R$)'
+                                                step={10}
                                             />
                                         </div>
 
@@ -265,14 +292,18 @@ export default function RegrasPage() {
                                         <div className="bg-white p-4 rounded shadow-sm border border-gray-200">
                                             <h4 className="font-bold text-slate-700 mb-4 border-b pb-2">Recarga</h4>
                                             <label className="block text-sm text-slate-600 mb-1">Pontos por Quantidade</label>
-                                            <input type="number" step="0.1" className="w-full p-2 border rounded mb-3"
+                                            <RuleInput 
                                                 value={formRegras.pontuacao.fator_qtd_recarga}
-                                                onChange={e => updateRegra('pontuacao', 'fator_qtd_recarga', e.target.value)}
+                                                onChange={(novoFator) => updateRegra('pontuacao', 'fator_qtd_recarga', novoFator)}
+                                                labelReferencia='Recargas'
                                             />
                                             <label className="block text-sm text-slate-600 mb-1">Pontos por Valor(R$)</label>
-                                            <input type="number" step="15" min="0" className="w-full p-2 border rounded mb-3"
-                                                value={formRegras.pontuacao.fator_valor_recarga.toFixed(2)}
-                                                onChange={e => updateRegra('pontuacao', 'fator_valor_recarga', e.target.value)}
+                                            <RuleInput 
+                                                value={formRegras.pontuacao.fator_valor_recarga}
+                                                onChange={(novoFator) => updateRegra('pontuacao', 'fator_valor_recarga', novoFator)}
+                                                labelReferencia='Reais (R$)'
+                                                step={15}
+                                                min={15}
                                             />
                                         </div>
 
