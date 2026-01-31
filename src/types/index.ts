@@ -61,7 +61,7 @@ export interface RegrasJSON {
         fator_qtd_recarga: number;
         fator_valor_recarga: number;
         fator_qtd_pesquisas: number;
-        peso_fds: DiaEspecial[];
+        dias_especiais: DiaEspecial[];
     };
     bonus: {
         meta_pix_qtd: number;
@@ -101,4 +101,19 @@ export interface RuleInputProps {
     labelReferencia?: string;
     min?: number;
     step?: number;
+}
+
+export interface BonusInputProps {
+    meta: number;
+    premio: number;
+    onMetaChange: (val: number) => void;
+    onPremioChange: (val: number) => void;
+    labelMeta: string;
+    unitMeta?: string; // ex: "transações", "R$"
+    stepMeta?: number;
+}
+
+export interface DiasEspeciaisInputProps {
+    dias: DiaEspecial[];
+    onChange: (novosDias: DiaEspecial[]) => void;
 }

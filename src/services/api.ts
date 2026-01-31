@@ -1,4 +1,12 @@
-import {Torneio, ItemPesquisa, OperadorSimples, HomeRankingResponse, ItemRanking, DadosTorneio} from "@/types";
+import {
+    Torneio,
+    ItemPesquisa,
+    OperadorSimples,
+    HomeRankingResponse,
+    ItemRanking,
+    DadosTorneio,
+    ModeloRegra
+} from "@/types";
 
 export const fetchHomeRanking = async (): Promise<HomeRankingResponse> => {
     const response = await fetch("/api/ranking.php");
@@ -26,5 +34,11 @@ export async function savePesquisas(torneioId: number, itens: ItemPesquisa[]): P
         method: 'POST',
         body: JSON.stringify({ torneio_id: torneioId, itens })
     });
+    return response.json();
+}
+
+export const fetchRegras= async (): Promise<ModeloRegra> => {
+    const response = await fetch(`/api/regras.php`);
+    if (!response.ok) throw new Error('Falha ao buscar dados do modelo.');
     return response.json();
 }

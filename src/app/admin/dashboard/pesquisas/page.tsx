@@ -3,7 +3,6 @@
 import { TorneiosList } from '@/components/TorneiosList';
 import { PesquisaForm } from '@/components/PesquisaForm';
 import {usePesquisaController} from "@/hooks/usePesquisaController";
-import {values} from "eslint-config-next";
 
 
 export default function PesquisasPage() {
