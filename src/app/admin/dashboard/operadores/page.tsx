@@ -10,13 +10,12 @@ import {
     Save,
     Search
 } from 'lucide-react';
+import { Operador } from '@/types';
+import { fetchOperadoresData, saveOperador, ToggleOperador } from '@/services/api';
+import SearchInput from '@/components/SearchInput';
+import { ItemSizeSelect } from '@/components/ItemSizeSelector';
+import { PaginatedButtons } from '@/components/PaginatedButtons';
 
-interface Operador {
-    matricula: number;
-    nome: string;
-    apelido: string;
-    valido: number; // Vem do PHP como 0 ou 1
-}
 
 export default function OperadoresPage() {
     const [operadores, setOperadores] = useState<Operador[]>([]);
@@ -37,8 +36,7 @@ export default function OperadoresPage() {
     // 1. Carregar Dados
     const fetchOperadores = async () => {
         try {
-            const res = await fetch('/api/operadores.php');
-            const data = await res.json();
+            const data = await fetchOperadoresData();
             setOperadores(data);
             setLoading(false);
         } catch (error) {
@@ -48,7 +46,7 @@ export default function OperadoresPage() {
     };
 
     useEffect(() => {
-        void fetchOperadores();
+        fetchOperadores();
     }, []);
 
     // 2. Manipular Modal (Abrir para Criar vs Abrir para Editar)
@@ -77,32 +75,24 @@ export default function OperadoresPage() {
                 is_edit: isEditing
             };
 
-            const res = await fetch('/api/operadores.php', {
-                method: 'POST',
-                body: JSON.stringify(payload)
-            });
-            const data = await res.json();
+            const data = await saveOperador(payload);
 
             if (data.sucesso) {
                 fetchOperadores(); // Recarrega a tabela
                 setIsModalOpen(false); // Fecha modal
             } else {
-                alert(data.erro || 'Erro ao salvar');
+                alert(data.error || 'Erro ao salvar');
             }
         } catch (error) {
-            alert('Erro de conexão');
+            alert('Erro de conexão: ' + error);
         }
     };
 
     // 4. Toggle Status (Ativar/Desativar)
     const handleToggleStatus = async (matricula: number) => {
         if (!confirm('Deseja alterar o status deste operador?')) return;
-
-        await fetch('/api/operadores.php', {
-            method: 'POST',
-            body: JSON.stringify({ acao: 'toggle_status', matricula })
-        });
-        fetchOperadores();
+        await ToggleOperador('toggle_status', matricula);
+        await fetchOperadores();
     };
 
     // Filtro de busca no front
@@ -115,7 +105,7 @@ export default function OperadoresPage() {
     const paginatedData = useMemo(() => {
         const startIndex = (currentPage - 1) * itemsPerPage;
         return filteredOps.slice(startIndex, startIndex + itemsPerPage);
-    }, [currentPage, filteredOps]);
+    }, [currentPage, filteredOps, itemsPerPage]);
 
     const totalPages = Math.ceil(filteredOps.length / itemsPerPage);
 
@@ -137,20 +127,22 @@ export default function OperadoresPage() {
             </div>
 
             {/* Barra de Busca */}
-            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 mb-4 flex items-center gap-2">
-                <Search size={20} className="text-gray-400" />
-                <input
-                    type="text"
-                    placeholder="Buscar por nome ou matrícula..."
-                    className="flex-1 outline-none text-slate-700"
-                    value={filtro}
-                    onChange={e => setFiltro(e.target.value)}
-                />
-            </div>
+            <SearchInput
+                value={filtro}
+                placeholder='Buscar por nome ou matrícula...'
+                onChange={setFiltro}
+            />
 
             {/* Seletor de Itens por Página */}
+            <ItemSizeSelect
+                itemsPerPage={itemsPerPage}
+                onChange={handleItemsPerPageChange}
+                currentPage={currentPage}
+                setCurrentPage={setCurrentPage}
+                totalPages={totalPages}
+            />
             <div className="mb-2 text-sm text-gray-600  uppercase flex flex-col md:flex-row justify-between items-end gap-2 no-print">
-                <div className="flex items-center gap-2">
+                {/*<div className="flex items-center gap-2">
                     <label htmlFor="rows" className="text-xs font-bold">Exibir:</label>
                     <select
                         id="rows"
@@ -165,9 +157,14 @@ export default function OperadoresPage() {
                     </select>
                 </div>
                 <span>Página <span className="font-bold text-black ">{currentPage}</span> de <span className="font-bold">{totalPages || 1}</span></span>
-
+                */}
                 {/* Botões de Paginação */}
-                {totalPages > 1 && (
+                <PaginatedButtons
+                    currentPage={currentPage}
+                    setCurrentPage={setCurrentPage}
+                    totalPages={totalPages}
+                />
+                {/*{totalPages > 1 && (
                     <div className="flex gap-1">
                         <button
                             onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
@@ -184,7 +181,7 @@ export default function OperadoresPage() {
                             PRÓXIMA
                         </button>
                     </div>
-                )}
+                )} */}
             </div>
 
             {/* Tabela */}

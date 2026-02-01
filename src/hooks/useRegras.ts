@@ -105,7 +105,7 @@ export function useRegras() {
                 alert('Erro: ' + data.error);
             }
         } catch (error) {
-            alert('Erro de conexão');
+            alert('Erro de conexão:' + error);
         }
     };
 

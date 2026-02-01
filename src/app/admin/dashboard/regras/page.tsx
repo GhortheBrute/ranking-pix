@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Plus } from 'lucide-react';
-import { useRegras } from '@/hooks/useRegras'; // Certifique-se de salvar o hook neste caminho ou ajustar
+import { useRegras } from '@/hooks/useRegras';
 import RegrasLista from '@/components/RegrasLista';
 import RegrasModal from '@/components/RegrasModal';
 

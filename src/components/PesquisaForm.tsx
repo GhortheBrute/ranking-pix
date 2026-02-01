@@ -1,23 +1,8 @@
 'use client';
 
-import React from 'react';
-import { ItemPesquisa, OperadorSimples, Torneio } from '@/types';
+import { PesquisaFormProps } from '@/types';
 import { ArrowLeft, Save, Trash2 } from 'lucide-react';
 import { OperadorSelect } from './OperadorSelect';
-
-interface PesquisaFormProps {
-    itens: ItemPesquisa[];
-    loading: boolean;
-    selectedOperador: OperadorSimples | null;
-    setSelectedOperador: (op: OperadorSimples | null) => void;
-    torneio: Torneio;
-    todosOperadores: OperadorSimples[];
-    onAddOperador: () => void;
-    onBack: () => void;
-    onUpdateQuantidade: (index: number, nova_qtd: string) => void;
-    onRemove: (index: number) => void;
-    onSave: () => void;
-}
 
 export function PesquisaForm({
     torneio,
@@ -48,12 +33,6 @@ export function PesquisaForm({
                 </div>
             </div>
 
-            {/* --- DESAFIO --- 
-               Agora é contigo! Cola aqui o resto do formulário:
-               1. A tabela de itens (map dos 'itens').
-               2. A área de adicionar (que usa o <OperadorSelect />).
-               3. O footer com o botão de Salvar.
-            */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200">
                 {/* LISTAGEM (As linhas que viram colunas) */}
                 <div className="divide-y divide-gray-100">

@@ -53,7 +53,6 @@ export default function Home() {
         return lista.sort((a, b) => b.pontos - a.pontos);
     }, [data, activeTab]);
 
-    const top3 = rankingAtivo.slice(0, 3);
 
     if (loading) {
         return (

@@ -41,6 +41,13 @@ export interface OperadorSimples {
     nome: string;
 }
 
+export interface Operador {
+    matricula: string;
+    nome: string;
+    apelido: string;
+    valido?: number; // Vem do PHP como 0 ou 1
+}
+
 export interface ItemPesquisa extends OperadorSimples {
     quantidade: number;
 }
@@ -90,6 +97,8 @@ export interface ModeloRegra {
     regras: RegrasJSON | string;
     is_edit?: boolean;
 }
+
+export type ModeloRegraCriacao = Omit<ModeloRegra, 'id'> & { id?: number | null };
 
 export interface RankingTableProps {
     dados: ItemRanking[];
@@ -141,4 +150,60 @@ export interface RegrasModalProps {
     onSave: (e: React.FormEvent) => void;
     updateRegra: (section: keyof RegrasJSON, field: string, value: number | string) => void;
     updateBool: (section: keyof RegrasJSON, field: string, value: boolean) => void;
+}
+
+export interface Logs {
+    id: number;
+    data: string;
+    usuario_id: number;
+    usuario_nome: string;
+    acao: string;
+    detalhes: string;
+    ip: string;
+}
+
+export interface SearchLogsProps {
+    placeholder?: string;
+    value: string;
+    onChange: (value: string) => void;
+}
+
+export interface TableLogsProps {
+    loading: boolean;
+    data: Logs[];
+    getBadgeColor: (acao: string) => void;
+}
+
+export interface PesquisaFormProps {
+    itens: ItemPesquisa[];
+    loading: boolean;
+    selectedOperador: OperadorSimples | null;
+    setSelectedOperador: (op: OperadorSimples | null) => void;
+    torneio: Torneio;
+    todosOperadores: OperadorSimples[];
+    onAddOperador: () => void;
+    onBack: () => void;
+    onUpdateQuantidade: (index: number, nova_qtd: string) => void;
+    onRemove: (index: number) => void;
+    onSave: () => void;
+}
+
+export interface ItemSizeSelectProps {
+    itemsPerPage: number;
+    onChange: (e: React.SelectHTMLAttributes) => void;
+    currentPage: number;
+}
+
+export interface PaginatedButtonsProps {
+    currentPage: number;
+    setCurrentPage: React.Dispatch<React.SetStateAction<number>>;
+    totalPages: number;
+}
+
+export interface OperadoresTableProps {
+    loading: boolean;
+    paginatedData: Operador[];
+    handleOpenEdit: (op: Operador) => void;
+    handleToggleStatus: () => void;
+    filteredOps: Operador[];
 }
