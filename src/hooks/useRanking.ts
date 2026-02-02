@@ -1,9 +1,9 @@
 // src/hooks/useRanking.ts
 import { useState, useEffect } from 'react';
-import { RankingResponse } from '@/types';
+import { HomeRankingResponse } from '@/types';
 
 export function useRanking(inicio?: string, fim?: string) {
-  const [data, setData] = useState<RankingResponse | null>(null);
+  const [data, setData] = useState<HomeRankingResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 

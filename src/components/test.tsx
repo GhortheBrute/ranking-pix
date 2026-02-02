@@ -4,7 +4,7 @@
 import { useState } from 'react';
 import { useRanking } from '@/hooks/useRanking';
 import RankingTable from '@/components/RankingTable';
-import Podium from '@/components/Podium';
+import Podium from '@/components/home/Podium';
 
 export default function Dashboard() {
   const { data, loading, error } = useRanking();

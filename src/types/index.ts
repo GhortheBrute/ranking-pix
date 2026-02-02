@@ -33,7 +33,7 @@ export  interface Torneio {
     data_inicio: string;
     data_fim: string;
     ativo?: boolean;
-    regras: RegrasJSON | null;
+    regras: RegrasJSON | null | undefined;
 }
 
 export interface OperadorSimples {
@@ -206,4 +206,20 @@ export interface OperadoresTableProps {
     handleOpenEdit: (op: Operador) => void;
     handleToggleStatus: () => void;
     filteredOps: Operador[];
+}
+
+export interface HomeTabsProps {
+    hasLocal: boolean;
+    hasMatriz: boolean;
+    setActiveTab: (tab: 'local' | 'matriz') => void ;
+    activeTab: 'local' | 'matriz';
+}
+
+export interface HomeBodyProps {
+    activeTab: 'local' | 'matriz';
+    hasLocal: boolean;
+    hasMatriz: boolean;
+    data: HomeRankingResponse | null;
+    initialDate: string;
+    endDate: string;
 }
