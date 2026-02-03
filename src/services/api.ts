@@ -101,10 +101,10 @@ export async function ToggleOperador(acao: string, matricula: number): Promise<{
 }
 
 // Buscar detalhes de operador na HOME
-export async function fetchOperadorHistory(matricula: number, startDate: string, endDate: string): Promise<HistoryOperatorResponse> {
-    const response = await fetch('/api/operadorhistory.php', {
+export async function fetchOperadorHistory(matricula: number, startDate: string, endDate: string, torneioId: number): Promise<HistoryOperatorResponse> {
+    const response = await fetch('/api/operador_history.php', {
         method: 'POST',
-        body: JSON.stringify({matricula, startDate, endDate})
+        body: JSON.stringify({matricula, startDate, endDate, torneioId})
     });
     return response.json();
 }

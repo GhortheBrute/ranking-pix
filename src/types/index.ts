@@ -104,6 +104,9 @@ export interface RankingTableProps {
     dados: ItemRanking[];
     tipo: 'LOCAL' | 'MATRIZ';
     regras?: RegrasJSON; // Opcional: Se não vier, usamos pesos padrão ou 0
+    torneioId?: number;
+    dataInicio?: string;
+    dataFim?: string;
 }
 
 export interface RuleInputProps {

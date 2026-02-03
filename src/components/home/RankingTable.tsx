@@ -1,13 +1,55 @@
-import { RankingTableProps } from "@/types";
-import { Medal, Trophy, TrendingUp, DollarSign, EyeOff, Eye, Filter } from "lucide-react";
+import {HistoryOperatorResponse, RankingTableProps} from "@/types";
+import {Medal, Trophy, TrendingUp, DollarSign, EyeOff, Eye, Filter, Loader2} from "lucide-react";
 import React, { useMemo, useState } from "react";
 import Podium from "./Podium";
+import {fetchOperadorHistory} from "@/services/api";
+import HistoryChart from "@/components/home/HistoryChart";
 
 
 
-export default function RankingTable({ dados, tipo, regras }: RankingTableProps) {
+export default function RankingTable({
+                                        dados,
+                                        tipo,
+                                        regras,
+                                        torneioId,
+                                        dataInicio,
+                                        dataFim
+}: RankingTableProps) {
     const [mostrarZerados, setMostrarZerados] = useState(false);
-    const [expandedRow, setExpandedRow] = useState(false);
+    const [expandedRow, setExpandedRow] = useState<number | null>(null);
+    const [chartData, setChartData] = useState<HistoryOperatorResponse | null>(null);
+    const [loadingChart, setLoadingChart] = useState(false);
+
+    const handleRowClick = async (matricula: number) => {
+        // 1. Se clicou na linha já aberta, fecha ela.
+        if (expandedRow === matricula) {
+            setExpandedRow(null);
+            return;
+        }
+
+        // 2. Se clicou numa nova, define como ativa e inicia o carregamento
+        setExpandedRow(matricula);
+        setChartData(null); // Limpa o gráfico anterior para não mostrar dados errados
+        setLoadingChart(true);
+
+        // 3. Validação de Segurança
+        if (!torneioId || !dataInicio || !dataFim) {
+            console.warn("Dados do torneio incompletos para buscar histórico.");
+            setLoadingChart(false);
+            return;
+        }
+
+        try {
+            // 4. Chamada à API (Fetch-on-Demand)
+            const response = await fetchOperadorHistory(matricula, dataInicio, dataFim, torneioId);
+            setChartData(response);
+        } catch (error) {
+            console.error("Erro ao buscar histórico:", error);
+            // Aqui você poderia setar um estado de erro visual se quisesse
+        } finally {
+            setLoadingChart(false);
+        }
+    };
 
     // --- 1. LÓGICA DE CÁLCULO E ORDENAÇÃO ---
     const dadosProcessados = useMemo(() => {
@@ -183,11 +225,49 @@ export default function RankingTable({ dados, tipo, regras }: RankingTableProps)
                                                         )}
                                                     </tr>
                                                     {expandedRow === item.matricula && (
-                                                        <tr className="bg-gray-50 border-b border-gray-200">
-                                                            <td colSpan={8} className="p-4">
-                                                                {/* GRÁFICO */}
-                                                                <div className="h-64 bg-white rounded shadow-inner p-4">
-                                                                    <p>Gráfico do {item.nome} aqui...</p>
+                                                        <tr className="bg-blue-50/30 border-b border-gray-200 animate-in fade-in zoom-in-95 duration-200">
+                                                            <td colSpan={8} className="p-4 pt-0">
+                                                                <div className="bg-white rounded-lg shadow-inner border border-gray-200 p-4 min-h-[200px] relative">
+
+                                                                    {/* Loading State */}
+                                                                    {loadingChart && (
+                                                                        <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/80 z-10">
+                                                                            <Loader2 className="w-8 h-8 text-blue-500 animate-spin mb-2" />
+                                                                            <span className="text-sm text-gray-500">Carregando histórico...</span>
+                                                                        </div>
+                                                                    )}
+
+                                                                    {/* Conteúdo do Gráfico */}
+                                                                    {!loadingChart && chartData && chartData.historico.length > 0 ? (
+                                                                        <div className="w-full">
+                                                                            <div className="flex justify-between items-center mb-2 px-2">
+                                                                                <h4 className="text-sm font-bold text-gray-700">
+                                                                                    Desempenho Diário - {chartData.operador.nome}
+                                                                                </h4>
+                                                                                {/* Legenda simples */}
+                                                                                <div className="flex gap-4 text-xs">
+                                                                                    <span className="flex items-center gap-1 text-blue-600 font-bold">
+                                                                                        <span className="w-2 h-2 rounded-full bg-blue-500"></span> PIX
+                                                                                    </span>
+                                                                                                                    <span className="flex items-center gap-1 text-purple-600 font-bold">
+                                                                                        <span className="w-2 h-2 rounded-full bg-purple-600"></span> Recargas
+                                                                                    </span>
+                                                                                </div>
+                                                                            </div>
+
+                                                                            {/* O COMPONENTE DE GRÁFICO QUE CRIAMOS */}
+                                                                            <HistoryChart
+                                                                                data={chartData.historico}
+                                                                                regras={chartData.torneio.regras}
+                                                                            />
+                                                                        </div>
+                                                                    ) : (
+                                                                        !loadingChart && (
+                                                                            <div className="flex flex-col items-center justify-center h-[200px] text-gray-400">
+                                                                                <p>Nenhum histórico disponível para este período.</p>
+                                                                            </div>
+                                                                        )
+                                                                    )}
                                                                 </div>
                                                             </td>
                                                         </tr>
