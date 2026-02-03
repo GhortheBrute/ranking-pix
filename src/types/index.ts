@@ -223,3 +223,20 @@ export interface HomeBodyProps {
     initialDate: string;
     endDate: string;
 }
+
+export interface HistoryDay {
+    data: string;
+    pix: Metrica;
+    recarga: Metrica;
+}
+
+export interface HistoryOperatorResponse {
+    torneio: {
+        nome: string,
+        regras: RegrasJSON
+    };
+    operador: {
+        nome: string;
+    };
+    historico: HistoryDay[];
+}

@@ -1,12 +1,13 @@
 import { RankingTableProps } from "@/types";
 import { Medal, Trophy, TrendingUp, DollarSign, EyeOff, Eye, Filter } from "lucide-react";
-import { useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import Podium from "./Podium";
 
 
 
 export default function RankingTable({ dados, tipo, regras }: RankingTableProps) {
     const [mostrarZerados, setMostrarZerados] = useState(false);
+    const [expandedRow, setExpandedRow] = useState(false);
 
     // --- 1. LÓGICA DE CÁLCULO E ORDENAÇÃO ---
     const dadosProcessados = useMemo(() => {
@@ -134,52 +135,64 @@ export default function RankingTable({ dados, tipo, regras }: RankingTableProps)
                                             const rank = index + 1;
 
                                             let rankIcon = <span className="text-gray-400 font-mono font-bold">#{rank}</span>;
-                                            let rowClass = "hover:bg-gray-300 transition-colors";
+                                            let rowClass = "hover:bg-gray-300 transition-colors cursor-pointer";
 
                                             if (rank === 1) {
                                                 rankIcon = <Medal className="w-6 h-6 text-yellow-500 mx-auto drop-shadow-sm" />;
-                                                rowClass = "bg-yellow-50/40 hover:bg-yellow-50 transition-colors border-l-4 border-yellow-400";
+                                                rowClass = "bg-yellow-50/40 hover:bg-yellow-50 transition-colors border-l-4 border-yellow-400 cursor-pointer";
                                             } else if (rank === 2) {
                                                 rankIcon = <Medal className="w-5 h-5 text-gray-400 mx-auto" />;
-                                                rowClass = "bg-gray-50/40 hover:bg-gray-100 transition-colors border-l-4 border-gray-300";
+                                                rowClass = "bg-gray-50/40 hover:bg-gray-100 transition-colors border-l-4 border-gray-300 cursor-pointer";
                                             } else if (rank === 3) {
                                                 rankIcon = <Medal className="w-5 h-5 text-amber-700 mx-auto" />;
-                                                rowClass = "bg-orange-50/20 hover:bg-orange-50 transition-colors border-l-4 border-amber-600";
+                                                rowClass = "bg-orange-50/20 hover:bg-orange-50 transition-colors border-l-4 border-amber-600 cursor-pointer";
                                             }
 
                                             return (
-                                                <tr key={item.matricula} className={rowClass}>
-                                                    {tipo === 'LOCAL' && <td className="p-4 text-center">{rankIcon}</td>}
+                                                <React.Fragment key={item.matricula}>
+                                                    <tr onClick={() => handleRowClick(item.matricula)} className={rowClass}>
+                                                        {tipo === 'LOCAL' && <td className="p-4 text-center">{rankIcon}</td>}
 
-                                                    <td className="p-4">
-                                                        <div className="font-bold text-gray-700">{item.nome}</div>
-                                                        <div className="text-xs text-gray-400">Matrícula: {item.matricula}</div>
-                                                    </td>
+                                                        <td className="p-4">
+                                                            <div className="font-bold text-gray-700">{item.nome}</div>
+                                                            <div className="text-xs text-gray-400">Matrícula: {item.matricula}</div>
+                                                        </td>
 
-                                                    <td className="p-4 text-right font-bold text-blue-600 bg-blue-50/10">
-                                                        {item.pix.qtd}
-                                                    </td>
-                                                    {tipo === 'LOCAL' && (
-                                                        <>
-                                                            <td className="p-4 text-right text-gray-500 text-sm">
-                                                                {formatCurrency(item.pix.valor)}
+                                                        <td className="p-4 text-right font-bold text-blue-600 bg-blue-50/10">
+                                                            {item.pix.qtd}
+                                                        </td>
+                                                        {tipo === 'LOCAL' && (
+                                                            <>
+                                                                <td className="p-4 text-right text-gray-500 text-sm">
+                                                                    {formatCurrency(item.pix.valor)}
+                                                                </td>
+                                                                <td className="p-4 text-right font-medium text-orange-600 bg-orange-50/10">
+                                                                    {item.recarga.qtd}
+                                                                </td>
+                                                                <td className="p-4 text-right text-gray-400 text-xs hidden md:table-cell">
+                                                                    {formatCurrency(item.recarga.valor)}
+                                                                </td>
+                                                                <td className="p-4 text-right font-medium text-purple-600 bg-purple-50/10">
+                                                                    {item.pesquisas}
+                                                                </td>
+                                                                <td className="p-4 text-right font-black text-gray-800 text-lg bg-gray-50">
+                                                                    {(item.pontuacao_geral).toFixed(0)}
+                                                                    <span className="text-[10px] font-normal text-gray-400 block -mt-1 uppercase">pts</span>
+                                                                </td>
+                                                            </>
+                                                        )}
+                                                    </tr>
+                                                    {expandedRow === item.matricula && (
+                                                        <tr className="bg-gray-50 border-b border-gray-200">
+                                                            <td colSpan={8} className="p-4">
+                                                                {/* GRÁFICO */}
+                                                                <div className="h-64 bg-white rounded shadow-inner p-4">
+                                                                    <p>Gráfico do {item.nome} aqui...</p>
+                                                                </div>
                                                             </td>
-                                                            <td className="p-4 text-right font-medium text-orange-600 bg-orange-50/10">
-                                                                {item.recarga.qtd}
-                                                            </td>
-                                                            <td className="p-4 text-right text-gray-400 text-xs hidden md:table-cell">
-                                                                {formatCurrency(item.recarga.valor)}
-                                                            </td>
-                                                            <td className="p-4 text-right font-medium text-purple-600 bg-purple-50/10">
-                                                                {item.pesquisas}
-                                                            </td>
-                                                            <td className="p-4 text-right font-black text-gray-800 text-lg bg-gray-50">
-                                                                {(item.pontuacao_geral).toFixed(0)}
-                                                                <span className="text-[10px] font-normal text-gray-400 block -mt-1 uppercase">pts</span>
-                                                            </td>
-                                                        </>
+                                                        </tr>
                                                     )}
-                                                </tr>
+                                                </React.Fragment>
                                             );
                                         })}
                                     </tbody>

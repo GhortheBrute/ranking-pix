@@ -5,7 +5,8 @@ import {
     ModeloRegra,
     ModeloRegraCriacao,
     Logs,
-    Operador
+    Operador,
+    HistoryOperatorResponse
 } from "@/types";
 
 // --- HOME ---
@@ -95,6 +96,15 @@ export async function ToggleOperador(acao: string, matricula: number): Promise<{
     const response = await fetch('/api/operadores.php', {
         method: 'POST',
         body: JSON.stringify({acao, matricula})
+    });
+    return response.json();
+}
+
+// Buscar detalhes de operador na HOME
+export async function fetchOperadorHistory(matricula: number, startDate: string, endDate: string): Promise<HistoryOperatorResponse> {
+    const response = await fetch('/api/operadorhistory.php', {
+        method: 'POST',
+        body: JSON.stringify({matricula, startDate, endDate})
     });
     return response.json();
 }
