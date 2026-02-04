@@ -9,17 +9,19 @@ import {
     HistoryOperatorResponse
 } from "@/types";
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || '/ranking_pix/api';
+
 // --- HOME ---
 // Busca os dados de ranking da página inicial
 export const fetchHomeRanking = async (): Promise<HomeRankingResponse> => {
-    const response = await fetch("/api/ranking.php");
+    const response = await fetch(`${API_BASE}/ranking.php`);
     return response.json();
 }
 
 // --- PESQUISAS ---
 // Buscar lista de torneios (Vigente e Outros)
 export async function fetchTorneiosPesquisa(): Promise<{ vigente: Torneio | null, outros: Torneio[] }> {
-    const response = await fetch('/api/pesquisas.php');
+    const response = await fetch(`${API_BASE}/pesquisas.php`);
     if (!response.ok) throw new Error('Falha ao buscar dados de torneios.');
     return response.json();
 }
@@ -33,7 +35,7 @@ export async function fetchDetalhesPesquisa(torneioId: number) {
 
 // Salvar os dados de Pesquisas
 export async function savePesquisas(torneioId: number, itens: ItemPesquisa[]): Promise<{ sucesso: boolean, erro?: string }> {
-    const response = await fetch('/api/pesquisas.php', {
+    const response = await fetch(`${API_BASE}/pesquisas.php`, {
         method: 'POST',
         body: JSON.stringify({ torneio_id: torneioId, itens })
     });
@@ -50,7 +52,7 @@ export const fetchRegras = async (): Promise<ModeloRegra[]> => {
 
 // Salvar os dados de Regra
 export async function saveRegras(payload: ModeloRegraCriacao): Promise<{ success: boolean, error?: string }> {
-    const response = await fetch('/api/regras.php', {
+    const response = await fetch(`${API_BASE}/regras.php`, {
         method: 'POST',
         body: JSON.stringify(payload)
     });
@@ -59,7 +61,7 @@ export async function saveRegras(payload: ModeloRegraCriacao): Promise<{ success
 
 // Ativar ou desativar Regras
 export async function toggleRegras(acao: string, id: number): Promise<{ success: boolean, error?: string }> {
-    const response = await fetch('/api/regras.php', {
+    const response = await fetch(`${API_BASE}/regras.php`, {
         method: 'POST',
         body: JSON.stringify({acao, id})
     });
@@ -69,7 +71,7 @@ export async function toggleRegras(acao: string, id: number): Promise<{ success:
 // --- LOGS ---
 // Buscar dados de Logs
 export const fetchLogsData = async (): Promise<Logs[]> => {
-    const response = await fetch('/api/logs.php');
+    const response = await fetch(`${API_BASE}/logs.php`);
     if (!response.ok) throw new Error('Falha ao buscar logs');
     return response.json();
 }
@@ -77,14 +79,14 @@ export const fetchLogsData = async (): Promise<Logs[]> => {
 // --- OPERADORES ---
 // Buscar dados de Operadores
 export const fetchOperadoresData = async (): Promise<Operador[]> => {
-    const response = await fetch('/api/operadores.php');
+    const response = await fetch(`${API_BASE}/operadores.php`);
     if (!response.ok) throw new Error('Falha ao buscar operadores');
     return response.json();
 }
 
 // Salvar os dados de Operador
 export async function saveOperador(payload: Operador): Promise<{ sucesso: boolean, error?: string }> {
-    const response = await fetch('/api/operadores.php', {
+    const response = await fetch(`${API_BASE}/operadores.php`, {
         method: 'POST',
         body: JSON.stringify(payload)
     });
@@ -93,7 +95,7 @@ export async function saveOperador(payload: Operador): Promise<{ sucesso: boolea
 
 // Ativar/Desativar Operador
 export async function ToggleOperador(acao: string, matricula: number): Promise<{ success: boolean, error?: string }> {
-    const response = await fetch('/api/operadores.php', {
+    const response = await fetch(`${API_BASE}/operadores.php`, {
         method: 'POST',
         body: JSON.stringify({acao, matricula})
     });
@@ -102,7 +104,7 @@ export async function ToggleOperador(acao: string, matricula: number): Promise<{
 
 // Buscar detalhes de operador na HOME
 export async function fetchOperadorHistory(matricula: number, startDate: string, endDate: string, torneioId: number): Promise<HistoryOperatorResponse> {
-    const response = await fetch('/api/operador_history.php', {
+    const response = await fetch(`${API_BASE}/operador_history.php`, {
         method: 'POST',
         body: JSON.stringify({matricula, startDate, endDate, torneioId})
     });

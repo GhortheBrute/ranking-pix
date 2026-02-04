@@ -7,8 +7,7 @@ import {
     UserX,
     UserCheck,
     X,
-    Save,
-    Search
+    Save
 } from 'lucide-react';
 import { Operador } from '@/types';
 import { fetchOperadoresData, saveOperador, ToggleOperador } from '@/services/api';
@@ -89,9 +88,9 @@ export default function OperadoresPage() {
     };
 
     // 4. Toggle Status (Ativar/Desativar)
-    const handleToggleStatus = async (matricula: number) => {
+    const handleToggleStatus = async (matricula: string) => {
         if (!confirm('Deseja alterar o status deste operador?')) return;
-        await ToggleOperador('toggle_status', matricula);
+        await ToggleOperador('toggle_status', Number(matricula));
         await fetchOperadores();
     };
 
@@ -138,7 +137,6 @@ export default function OperadoresPage() {
                 itemsPerPage={itemsPerPage}
                 onChange={handleItemsPerPageChange}
                 currentPage={currentPage}
-                setCurrentPage={setCurrentPage}
                 totalPages={totalPages}
             />
             <div className="mb-2 text-sm text-gray-600  uppercase flex flex-col md:flex-row justify-between items-end gap-2 no-print">

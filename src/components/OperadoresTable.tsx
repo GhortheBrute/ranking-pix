@@ -56,7 +56,7 @@ export function OperadoresTable({loading, paginatedData, handleOpenEdit, handleT
                         </td>
                         <td className="p-4 text-right flex justify-end gap-2">
                             <button
-                                onClick={(op) => handleOpenEdit(op)}
+                                onClick={() => handleOpenEdit(op)}
                                 className="p-2 text-blue-600 hover:bg-blue-50 rounded"
                                 title="Editar"
                             >

@@ -3,7 +3,8 @@ import { ItemSizeSelectProps } from "@/types";
 export function ItemSizeSelect({
     itemsPerPage,
     onChange,
-    currentPage
+    currentPage,
+    totalPages
 }: ItemSizeSelectProps) {
 
     return (

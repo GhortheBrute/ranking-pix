@@ -1,6 +1,4 @@
-'use client';
-
-import React from 'react';
+import { Metrica, RegrasJSON } from "@/types";
 import {
     BarChart,
     Bar,
@@ -9,151 +7,114 @@ import {
     CartesianGrid,
     Tooltip,
     ResponsiveContainer,
-    TooltipProps,
-    Legend
-} from 'recharts';
-import { HistoryDay, RegrasJSON } from '@/types';
+    TooltipProps
+} from "recharts";
+import { NameType, ValueType } from "recharts/types/component/DefaultTooltipContent";
 
+interface HistoricoData {
+    data: string;
+    pix: Metrica;
+    recarga: Metrica;
+}
+
+// Interface combinada: Props do Recharts + Suas Props (regras)
+interface CustomTooltipProps extends TooltipProps<ValueType, NameType> {
+    regras: RegrasJSON;
+    payload?: Array<{ payload: HistoricoData }>;
+    label?: string;
+    active?: boolean;
+}
+
+// Componente Customizado do Tooltip
+const CustomTooltip = ({ active, payload, label, regras }: CustomTooltipProps) => {
+    // 1. Verificação de Segurança: Só renderiza se estiver ativo e tiver dados
+    if (active && payload && payload.length) {
+        // O Recharts coloca seu objeto de dados dentro de payload[0].payload
+        const data = payload[0].payload as HistoricoData;
+
+        // Cálculos de Pontos (Exemplo básico usando as regras)
+        // Ajuste conforme a lógica real do seu sistema
+        const pontosPix = (data.pix.qtd * (regras?.pontuacao?.fator_qtd_pix || 0)) + 
+                          (data.pix.valor * (regras?.pontuacao?.fator_valor_pix || 0));
+        
+        const pontosRecarga = (data.recarga.qtd * (regras?.pontuacao?.fator_qtd_recarga || 0)) + 
+                              (data.recarga.valor * (regras?.pontuacao?.fator_valor_recarga || 0));
+
+        const totalPontos = pontosPix + pontosRecarga;
+
+        return (
+            <div className="bg-white p-3 border border-gray-200 shadow-lg rounded text-xs text-gray-700 z-50">
+                <p className="font-bold mb-2 border-b pb-1">{`Data: ${label}`}</p>
+                
+                {/* Seção PIX */}
+                <div className="mb-2">
+                    <p className="text-blue-600 font-bold">PIX</p>
+                    <p>Quantidade: {data.pix.qtd}</p>
+                    <p>Valor: R$ {data.pix.valor.toFixed(2)}</p>
+                </div>
+
+                {/* Seção Recarga */}
+                <div className="mb-2">
+                    <p className="text-purple-600 font-bold">Recargas</p>
+                    <p>Quantidade: {data.recarga.qtd}</p>
+                    <p>Valor: R$ {data.recarga.valor.toFixed(2)}</p>
+                </div>
+
+                {/* Totalização Estimada */}
+                <div className="mt-2 pt-2 border-t border-gray-100 bg-gray-50 -mx-3 -mb-3 p-2 rounded-b">
+                    <p className="font-bold text-gray-900 text-center">
+                        Pontos do Dia: {totalPontos.toFixed(0)}
+                    </p>
+                </div>
+            </div>
+        );
+    }
+
+    return null;
+};
+
+// Componente Principal do Gráfico
 interface HistoryChartProps {
-    data: HistoryDay[];
+    data: HistoricoData[];
     regras: RegrasJSON;
 }
 
-// Helper para formatar moeda
-const formatCurrency = (val: number) => 
-    new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
-
-// Helper para calcular pontos (divisão pelo fator)
-// Ex: 1 ponto a cada 50 (fator) -> 100 qtd / 50 = 2 pontos
-const calcPoints = (qtd: number, fator: number) => {
-    if (!fator || fator <= 0) return 0;
-    return Math.floor(qtd / fator);
-};
-
 export default function HistoryChart({ data, regras }: HistoryChartProps) {
-
-    // 1. Prepara os dados para o gráfico (calcula os pontos totais de cada barra)
-    const chartData = data.map(dia => {
-        // Pontos PIX (Soma de Qtd + Valor)
-        const ptsPixQtd = calcPoints(dia.pix.qtd, regras.pontuacao.fator_qtd_pix);
-        const ptsPixVal = calcPoints(dia.pix.valor, regras.pontuacao.fator_valor_pix);
-        
-        // Pontos Recarga (Soma de Qtd + Valor)
-        const ptsRecQtd = calcPoints(dia.recarga.qtd, regras.pontuacao.fator_qtd_recarga);
-        const ptsRecVal = calcPoints(dia.recarga.valor, regras.pontuacao.fator_valor_recarga);
-
-        return {
-            ...dia,
-            // Formatamos a data para dia/mês (Ex: 25/10) para o eixo X
-            dataFormatada: new Date(dia.data + "T00:00:00").toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }),
-            totalPontosPix: ptsPixQtd + ptsPixVal,
-            totalPontosRecarga: ptsRecQtd + ptsRecVal,
-        };
-    });
-
-    // 2. Custom Tooltip (Onde a mágica do detalhamento acontece)
-    const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>) => {
-        if (active && payload && payload.length) {
-            // O payload traz os dados do dia que o mouse está em cima
-            const dia = payload[0].payload as (typeof chartData)[0];
-            
-            // Recalculamos para exibir detalhado
-            const fatorPixQtd = regras.pontuacao.fator_qtd_pix;
-            const fatorPixVal = regras.pontuacao.fator_valor_pix;
-            const fatorRecQtd = regras.pontuacao.fator_qtd_recarga;
-            const fatorRecVal = regras.pontuacao.fator_valor_recarga;
-
-            const ptsPixQtd = calcPoints(dia.pix.qtd, fatorPixQtd);
-            const ptsPixVal = calcPoints(dia.pix.valor, fatorPixVal);
-            const ptsRecQtd = calcPoints(dia.recarga.qtd, fatorRecQtd);
-            const ptsRecVal = calcPoints(dia.recarga.valor, fatorRecVal);
-
-            return (
-                <div className="bg-white p-3 border border-slate-200 shadow-xl rounded-lg text-xs leading-relaxed min-w-[200px] z-50">
-                    <p className="font-bold text-slate-700 mb-2 text-center border-b pb-1">{dia.dataFormatada}</p>
-                    
-                    {/* Seção PIX */}
-                    <div className="mb-2">
-                        <p className="font-bold text-blue-600">PIX ({dia.totalPontosPix} pts)</p>
-                        {fatorPixQtd > 0 && (
-                            <div className="flex justify-between text-slate-500 pl-2">
-                                <span>Qtd: {dia.pix.qtd} (÷{fatorPixQtd})</span>
-                                <span className="font-mono text-slate-700">= {ptsPixQtd} pts</span>
-                            </div>
-                        )}
-                        {fatorPixVal > 0 && (
-                            <div className="flex justify-between text-slate-500 pl-2">
-                                <span>Vlr: {formatCurrency(dia.pix.valor)} (÷{fatorPixVal})</span>
-                                <span className="font-mono text-slate-700">= {ptsPixVal} pts</span>
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Seção Recarga */}
-                    <div>
-                        <p className="font-bold text-purple-600">Recarga ({dia.totalPontosRecarga} pts)</p>
-                        {fatorRecQtd > 0 && (
-                            <div className="flex justify-between text-slate-500 pl-2">
-                                <span>Qtd: {dia.recarga.qtd} (÷{fatorRecQtd})</span>
-                                <span className="font-mono text-slate-700">= {ptsRecQtd} pts</span>
-                            </div>
-                        )}
-                        {fatorRecVal > 0 && (
-                            <div className="flex justify-between text-slate-500 pl-2">
-                                <span>Vlr: {formatCurrency(dia.recarga.valor)} (÷{fatorRecVal})</span>
-                                <span className="font-mono text-slate-700">= {ptsRecVal} pts</span>
-                            </div>
-                        )}
-                    </div>
-
-                    <div className="mt-2 pt-2 border-t border-slate-100 flex justify-between font-bold text-slate-800">
-                        <span>Total do Dia:</span>
-                        <span>{dia.totalPontosPix + dia.totalPontosRecarga} pts</span>
-                    </div>
-                </div>
-            );
-        }
-        return null;
-    };
-
     return (
-        <div className="w-full h-[250px] mt-4">
-            <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={chartData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                    <XAxis 
-                        dataKey="dataFormatada" 
-                        tick={{ fontSize: 10, fill: '#64748b' }} 
-                        axisLine={false} 
-                        tickLine={false} 
-                    />
-                    <YAxis 
-                        tick={{ fontSize: 10, fill: '#64748b' }} 
-                        axisLine={false} 
-                        tickLine={false} 
-                    />
-                    <Tooltip content={<CustomTooltip />} cursor={{ fill: '#f1f5f9' }} />
-                    <Legend iconSize={8} wrapperStyle={{ fontSize: '10px', paddingTop: '10px' }} />
-                    
-                    {/* Barra PIX */}
-                    <Bar 
-                        dataKey="totalPontosPix" 
-                        name="Pontos PIX" 
-                        fill="#3b82f6" 
-                        radius={[4, 4, 0, 0]} 
-                        barSize={12} // Barra mais fina
-                    />
-                    
-                    {/* Barra Recarga */}
-                    <Bar 
-                        dataKey="totalPontosRecarga" 
-                        name="Pontos Recarga" 
-                        fill="#9333ea" 
-                        radius={[4, 4, 0, 0]} 
-                        barSize={12} 
-                    />
-                </BarChart>
-            </ResponsiveContainer>
-        </div>
+        <ResponsiveContainer width="100%" height={200}>
+            <BarChart
+                data={data}
+                margin={{
+                    top: 5,
+                    right: 10,
+                    left: -20, // Ajuste para esconder o eixo Y se quiser
+                    bottom: 0,
+                }}
+            >
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#eee" />
+                
+                {/* Eixo X formatando a data (ex: 2023-10-25 -> 25/10) */}
+                <XAxis 
+                    dataKey="data" 
+                    tickFormatter={(value) => {
+                        const [ano, mes, dia] = value.split('-');
+                        return `${dia}/${mes}`;
+                    }}
+                    tick={{ fontSize: 10 }}
+                />
+                
+                <YAxis tick={{ fontSize: 10 }} />
+                
+                {/* Aqui passamos o componente CustomTooltip e injetamos as regras nele */}
+                <Tooltip content={<CustomTooltip regras={regras} />} />
+                
+                {/* Barra de PIX (Quantidade ou Valor - você decide o que mostrar na barra visual) */}
+                {/* Aqui estou mostrando a Quantidade, mas você pode mudar dataKey para "pix.valor" */}
+                <Bar dataKey="pix.qtd" name="Qtd Pix" fill="#3b82f6" stackId="a" />
+                
+                {/* Barra de Recarga */}
+                <Bar dataKey="recarga.qtd" name="Qtd Recarga" fill="#9333ea" stackId="a" />
+            </BarChart>
+        </ResponsiveContainer>
     );
 }

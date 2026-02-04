@@ -103,7 +103,7 @@ export type ModeloRegraCriacao = Omit<ModeloRegra, 'id'> & { id?: number | null 
 export interface RankingTableProps {
     dados: ItemRanking[];
     tipo: 'LOCAL' | 'MATRIZ';
-    regras?: RegrasJSON; // Opcional: Se não vier, usamos pesos padrão ou 0
+    regras?: RegrasJSON | null;
     torneioId?: number;
     dataInicio?: string;
     dataFim?: string;
@@ -193,9 +193,11 @@ export interface PesquisaFormProps {
 
 export interface ItemSizeSelectProps {
     itemsPerPage: number;
-    onChange: (e: React.SelectHTMLAttributes) => void;
+    onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
     currentPage: number;
+    totalPages: number;
 }
+
 
 export interface PaginatedButtonsProps {
     currentPage: number;
@@ -207,7 +209,7 @@ export interface OperadoresTableProps {
     loading: boolean;
     paginatedData: Operador[];
     handleOpenEdit: (op: Operador) => void;
-    handleToggleStatus: () => void;
+    handleToggleStatus: (matricula: string) => void;
     filteredOps: Operador[];
 }
 
