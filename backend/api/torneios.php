@@ -7,8 +7,8 @@ $method = $_SERVER['REQUEST_METHOD'];
 if ($method === 'GET') {
     // Traz todos, ordenados por criado_em
     $stmt = $pdo->query("SELECT t.*, r.nome as nome_regra
-                                FROM torneios t
-                                LEFT JOIN regras_modelos r ON t.regra_id = r.id
+                                FROM rank_torneios t
+                                LEFT JOIN rank_regras r ON t.regra_id = r.id
                                 ORDER BY t.data_inicio DESC");
     $regras = $stmt->fetchAll(PDO::FETCH_ASSOC);
     echo json_encode($regras);
@@ -34,7 +34,7 @@ if ($method === 'POST') {
 
         // Ação: TOGGLE STATUS
         if (isset($data->acao) && $data->acao == 'toggle_status') {
-            $sql = "UPDATE torneios SET ativo = NOT ativo WHERE id = ?";
+            $sql = "UPDATE rank_torneios SET ativo = NOT ativo WHERE id = ?";
             $stmt = $pdo->prepare($sql);
             $stmt->execute([$data->id]);
             echo json_encode(['success' => true, 'message' => 'Status alterado com sucesso!']);
@@ -45,7 +45,7 @@ if ($method === 'POST') {
         // Se vier "is_edit", fazemos UPDATE. Senão, INSERT.
         if (isset($data->is_edit) && $data->is_edit === true) {
             // Atualiza Nome e Apelido
-            $sql = "UPDATE torneios 
+            $sql = "UPDATE rank_torneios 
                     SET nome = ?, data_inicio=?, data_fim=?, regra_id = ? 
                     WHERE id = ?";
             $stmt = $pdo->prepare($sql);
@@ -58,7 +58,7 @@ if ($method === 'POST') {
             logAdmin($pdo, $_SESSION['admin_id'], 'atualizar_torneio', ['alvo' => $data->nome]);
         } else {
             // Cria Novo
-            $sql = "INSERT INTO torneios ( nome, data_inicio, data_fim, regra_id) VALUES ( ?, ?, ?, ?)";
+            $sql = "INSERT INTO rank_torneios ( nome, data_inicio, data_fim, regra_id) VALUES ( ?, ?, ?, ?)";
             $stmt = $pdo->prepare($sql);
             $stmt->execute([
                 $data->nome,

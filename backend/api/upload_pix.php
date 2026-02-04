@@ -102,7 +102,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES[$nomeDoArquivo])) {
             // Cria string de placeholders (?,?,?) para a query
             $placeholders = implode(',', array_fill(0, count($idsUnicosCSV), '?'));
             
-            $sqlCheck = "SELECT matricula FROM operadores WHERE matricula IN ($placeholders)";
+            $sqlCheck = "SELECT matricula FROM rank_operadores WHERE matricula IN ($placeholders)";
             $stmtCheck = $pdo->prepare($sqlCheck);
             $stmtCheck->execute(array_values($idsUnicosCSV));
             

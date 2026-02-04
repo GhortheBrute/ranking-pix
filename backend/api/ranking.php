@@ -14,8 +14,8 @@ try {
     // 2. Busca TODOS os torneios ativos hoje (sem LIMIT)
     $sqlTorneios = "SELECT t.id, t.nome, t.tipo, t.data_inicio, t.data_fim,
                             r.regras AS json_regras
-                    FROM torneios t
-                    LEFT JOIN regras_modelos r ON r.id = t.regra_id
+                    FROM rank_torneios t
+                    LEFT JOIN rank_regras r ON r.id = t.regra_id
                     WHERE data_inicio <= :inicio AND data_fim >= :fim AND t.ativo = 1";
 
     $stmtTorneios = $pdo->prepare($sqlTorneios);
@@ -38,7 +38,7 @@ try {
                         o.matricula, o.nome, o.apelido,
                         COUNT(rp.transacao) as total_qtd_pix,
                         SUM(rp.valor_pix) as total_valor_pix
-                    FROM operadores o
+                    FROM rank_operadores o
                     LEFT JOIN rank_pix rp ON o.matricula = rp.operador 
                         AND rp.data BETWEEN :inicio AND :fim
                     WHERE o.valido = 1

@@ -52,18 +52,18 @@ if ($method === 'GET') {
     // Se tem ID, carrega os detalhes
     if ($torneio_id) {
         // Dados do Torneio
-        $stmt = $pdo->prepare("SELECT id, nome FROM torneios WHERE id = ?");
+        $stmt = $pdo->prepare("SELECT id, nome FROM rank_torneios WHERE id = ?");
         $stmt->execute([$torneio_id]);
         $torneio = $stmt->fetch(PDO::FETCH_ASSOC);
 
         // Operadores disponíveis para DROPDOWN - Apenas validos
-        $stmtOp = $pdo->query("SELECT matricula, nome FROM operadores WHERE valido = 1");
+        $stmtOp = $pdo->query("SELECT matricula, nome FROM rank_operadores WHERE valido = 1");
         $operadores = $stmtOp->fetchAll(PDO::FETCH_ASSOC);
 
         // Pesquisas já lançadas neste torneio
         $sqlPesq = "SELECT p.operador AS matricula, p.qtd_pesquisa AS quantidade, o.nome
                     FROM rank_pesquisa p 
-                    LEFT JOIN operadores o ON p.operador = o.matricula
+                    LEFT JOIN rank_operadores o ON p.operador = o.matricula
                     WHERE p.torneio_id = ?
                     ORDER BY o.nome";
         $stmtPesq = $pdo->prepare($sqlPesq);

@@ -6,7 +6,7 @@ $method = $_SERVER['REQUEST_METHOD'];
 // 1. LISTAR REGRAS (GET)
 if ($method === 'GET') {
     // Traz todos, ordenados por criado_em
-    $stmt = $pdo->query("SELECT * FROM regras_modelos ORDER BY criado_em DESC");
+    $stmt = $pdo->query("SELECT * FROM rank_regras ORDER BY criado_em DESC");
     $regras = $stmt->fetchAll(PDO::FETCH_ASSOC);
     echo json_encode($regras);
     exit;
@@ -25,7 +25,7 @@ if ($method === 'POST') {
     try {
         // Ação: TOGGLE STATUS
         if (isset($data->acao) && $data->acao == 'toggle_status') {
-            $sql = "UPDATE regras_modelos SET ativo = NOT ativo WHERE id = :id";
+            $sql = "UPDATE rank_regras SET ativo = NOT ativo WHERE id = :id";
             $stmt = $pdo->prepare($sql);
             $stmt->execute([$data->id]);
             logAdmin($pdo, $_SESSION['admin_id'], 'toggle_regra', ['alvo' => $data->nome]);
@@ -43,13 +43,13 @@ if ($method === 'POST') {
         // Se vier "is_edit", fazemos UPDATE. Senão, INSERT.
         if (isset($data->is_edit) && $data->is_edit === true) {
             // Atualiza Nome e Apelido
-            $sql = "UPDATE regras_modelos SET nome = ?, regras = ? WHERE id = ?";
+            $sql = "UPDATE rank_regras SET nome = ?, regras = ? WHERE id = ?";
             $stmt = $pdo->prepare($sql);
             $stmt->execute([$data->nome, $regrasJSON, $data->id]);
             logAdmin($pdo, $_SESSION['admin_id'], 'atualizar_regra', ['alvo' => $data->nome]);
         } else {
             // Cria Novo
-            $sql = "INSERT INTO regras_modelos ( nome, regras, ativo) VALUES ( ?, ?, 1)";
+            $sql = "INSERT INTO rank_regras ( nome, regras, ativo) VALUES ( ?, ?, 1)";
             $stmt = $pdo->prepare($sql);
             $stmt->execute([$data->nome, $regrasJSON]);
             logAdmin($pdo, $_SESSION['admin_id'], 'criar_regra', ['alvo' => $data->nome]);

@@ -15,7 +15,7 @@ try {
     }
 
     // 2. Buscar dados do Torneio (Datas e Tipo)
-    $sqlTorneio = "SELECT tipo, data_inicio, data_fim FROM torneios WHERE id = :id";
+    $sqlTorneio = "SELECT tipo, data_inicio, data_fim FROM rank_torneios WHERE id = :id";
     $stmtTorneio = $pdo->prepare($sqlTorneio);
     $stmtTorneio->execute([':id' => $torneioId]);
     $torneio = $stmtTorneio->fetch(PDO::FETCH_ASSOC);
@@ -34,7 +34,7 @@ try {
                     o.matricula, o.nome, o.apelido,
                     COUNT(rp.transacao) as total_qtd_pix,
                     SUM(rp.valor_pix) as total_valor_pix
-                FROM operadores o
+                FROM rank_operadores o
                 LEFT JOIN rank_pix rp ON o.matricula = rp.operador 
                     AND rp.data BETWEEN :inicio AND :fim
                 WHERE o.valido = 1

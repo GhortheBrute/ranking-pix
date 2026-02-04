@@ -49,13 +49,13 @@ if ($method === 'POST') {
             // Verifica se a senha foi enviada para decidir se atualiza ela ou não
             if (!empty($data->password)) {
                 // Se tem senha nova, atualiza tudo (com hash)
-                $sql = "UPDATE usuarios SET password = ?, role = ? WHERE id = ?";
+                $sql = "UPDATE rank_usuarios SET password = ?, role = ? WHERE id = ?";
                 $stmt = $pdo->prepare($sql);
                 // CRÍTICO: Usar password_hash
                 $stmt->execute([$data->password, $data->role, $data->id]);
             } else {
                 // Se a senha está vazia, atualiza SÓ o role e mantém a senha antiga
-                $sql = "UPDATE usuarios SET role = ? WHERE id = ?";
+                $sql = "UPDATE rank_usuarios SET role = ? WHERE id = ?";
                 $stmt = $pdo->prepare($sql);
                 $stmt->execute([$data->role, $data->id]);
             }
@@ -66,7 +66,7 @@ if ($method === 'POST') {
                 throw new Exception("A senha é obrigatória para novos usuários.");
             }
             
-            $sql = "INSERT INTO usuarios (username, password, role) VALUES (?, ?, ?)";
+            $sql = "INSERT INTO rank_usuarios (username, password, role) VALUES (?, ?, ?)";
             $stmt = $pdo->prepare($sql);
             // CRÍTICO: Usar password_hash
             $stmt->execute([$data->username, $data->password, $data->role]);

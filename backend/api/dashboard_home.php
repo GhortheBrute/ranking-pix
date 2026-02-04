@@ -7,7 +7,7 @@ try {
     // Torneio Vigente
     $hoje = date('Y-m-d');
     $sqlTorneio = "SELECT nome, data_fim, id
-                   FROM torneios
+                   FROM rank_torneios
                    WHERE data_inicio <= :hoje_inicio AND data_fim >= :hoje_fim
                    ORDER BY id DESC LIMIT 1
     ";
@@ -32,7 +32,7 @@ try {
 
     // Total de operadores ativos
     $sqlOps = "SELECT COUNT(*) as total
-               FROM operadores
+               FROM rank_operadores
                WHERE valido = 1
     ";
     $stmt = $pdo->query($sqlOps);

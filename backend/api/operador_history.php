@@ -47,8 +47,8 @@ try {
     $recResults = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     $sqlRegras = "SELECT rm.regras
-                    FROM regras_modelos rm
-                    LEFT JOIN torneios t ON t.regra_id = rm.id
+                    FROM rank_regras rm
+                    LEFT JOIN rank_torneios t ON t.regra_id = rm.id
                     WHERE t.id = :torneio_id
 ";
     $stmt = $pdo->prepare($sqlRegras);
@@ -80,6 +80,9 @@ try {
     echo json_encode([
         'torneio' => [
             'regras' => $regrasJSON
+        ],
+        'operador' => [
+            'nome' => 'Fulano'
         ],
         'historico' => $listaFinal
     ]);

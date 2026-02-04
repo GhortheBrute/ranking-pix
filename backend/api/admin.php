@@ -14,7 +14,7 @@ $acao = $_GET['acao'] ?? ($data->acao ?? '');
 // --- 1. LOGIN ---
 if ($acao === 'login' && $method === 'POST') {
     // 1. Busca só pelo login
-    $stmt = $pdo->prepare("SELECT id, username, role, password FROM usuarios WHERE username = ?");
+    $stmt = $pdo->prepare("SELECT id, username, role, password FROM rank_usuarios WHERE username = ?");
     $stmt->execute([$data->login]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 

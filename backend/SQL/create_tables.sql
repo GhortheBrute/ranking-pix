@@ -6,7 +6,7 @@ DROP TABLE IF EXISTS usuarios;
 DROP TABLE IF EXISTS ranking_cache;
 
 -- 1. Tabela de Operadores (Foco no Ranking)
-CREATE TABLE operadores (
+CREATE TABLE rank_operadores (
                             matricula INT PRIMARY KEY,
                             nome VARCHAR(100) NOT NULL,
                             apelido VARCHAR(30),
@@ -14,7 +14,7 @@ CREATE TABLE operadores (
 );
 
 -- 2. Tabela de Usuários do Sistema (Foco no Acesso)
-CREATE TABLE usuarios (
+CREATE TABLE rank_usuarios (
                           id INT PRIMARY KEY AUTO_INCREMENT,
                           username VARCHAR(50) NOT NULL UNIQUE, -- Login único
                           password VARCHAR(255) NOT NULL, -- Hash BCRYPT
@@ -55,7 +55,7 @@ CREATE TABLE rank_recarga (
 );
 
 -- 5. Tabela de Regras para os torneios
-CREATE TABLE regras_modelos(
+CREATE TABLE rank_regras(
                                id INT PRIMARY KEY AUTO_INCREMENT,
                                nome VARCHAR(100) NOT NULL,
                                regras JSON NOT NULL,
@@ -64,7 +64,7 @@ CREATE TABLE regras_modelos(
 );
 
 -- 6. Tabela de Torneios
-CREATE TABLE torneios (
+CREATE TABLE rank_torneios (
                           id INT AUTO_INCREMENT PRIMARY KEY,
                           nome VARCHAR(100) NOT NULL,       -- Ex: "Arrancada de Outubro"
                           tipo ENUM('LOCAL', 'MATRIZ') NOT NULL DEFAULT 'LOCAL',
@@ -95,18 +95,8 @@ create table rank_pesquisa (
                             UNIQUE KEY unique_pesquisa_torneio (torneio_id, operador)
 );
 
--- 8. Tabela de Cache
-CREATE TABLE ranking_cache (
-                               torneio_id INT PRIMARY KEY,
-                               ultimo_calculo TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                               dados_json LONGTEXT,
-                               CONSTRAINT fk_cache_torneio
-                                   FOREIGN KEY (torneio_id)
-                                       REFERENCES torneios(id)
-                                       ON DELETE CASCADE
-);
 
-CREATE TABLE logs (
+CREATE TABLE rank_logs (
                             id INT PRIMARY KEY AUTO_INCREMENT,
                             data TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
                             usuario_id INT NOT NULL,

@@ -26,7 +26,7 @@ if ($method === 'POST') {
     try {
         // Ação: TOGGLE STATUS (Ativar/Desativar)
         if (isset($data->acao) && $data->acao === 'toggle_status') {
-            $sql = "UPDATE operadores SET valido = NOT valido WHERE matricula = ?";
+            $sql = "UPDATE rank_operadores SET valido = NOT valido WHERE matricula = ?";
             $stmt = $pdo->prepare($sql);
             $stmt->execute([$data->matricula]);
             logAdmin($pdo, $_SESSION['admin_id'], 'toggle_operador', ['alvo' => $data->nome]);
@@ -38,13 +38,13 @@ if ($method === 'POST') {
         // Se vier "is_edit", fazemos UPDATE. Senão, INSERT.
         if (isset($data->is_edit) && $data->is_edit === true) {
             // Atualiza Nome e Apelido
-            $sql = "UPDATE operadores SET nome = ?, apelido = ? WHERE matricula = ?";
+            $sql = "UPDATE rank_operadores SET nome = ?, apelido = ? WHERE matricula = ?";
             $stmt = $pdo->prepare($sql);
             $stmt->execute([$data->nome, $data->apelido, $data->matricula]);
             logAdmin($pdo, $_SESSION['admin_id'], 'atualizar_operador', ['alvo' => $data->nome]);
         } else {
             // Cria Novo (Matrícula deve ser única)
-            $sql = "INSERT INTO operadores (matricula, nome, apelido, valido) VALUES (?, ?, ?, 1)";
+            $sql = "INSERT INTO rank_operadores (matricula, nome, apelido, valido) VALUES (?, ?, ?, 1)";
             $stmt = $pdo->prepare($sql);
             $stmt->execute([$data->matricula, $data->nome, $data->apelido]);
             logAdmin($pdo, $_SESSION['admin_id'], 'criar_operador', ['alvo' => $data->nome]);
