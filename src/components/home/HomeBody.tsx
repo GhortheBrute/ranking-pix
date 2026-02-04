@@ -33,7 +33,14 @@ export default function HomeBody({
                     </div>
 
                     {/* TABELA DE RANKINGS */}
-                    <RankingTable dados={data.local.data} tipo="LOCAL" regras={data.local.torneio.regras} />
+                    <RankingTable
+                        dados={data.local.data}
+                        tipo="LOCAL"
+                        regras={data.local.torneio.regras}
+                        torneioId={data.local.torneio.id}
+                        dataInicio={data.local.torneio.data_inicio}
+                        dataFim={data.local.torneio.data_fim}
+                    />
                 </>
             )}
 

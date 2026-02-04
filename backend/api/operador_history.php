@@ -2,10 +2,14 @@
 require_once './config.php';
 header('Content-Type: application/json');
 
-$matricula = $_GET['matricula'];
-$startDate = $_GET['startDate'];
-$endDate = $_GET['endDate'];
-$torneioId = $_GET['torneioId'];
+$json = file_get_contents("php://input");
+
+$data = json_decode($json, true);
+
+$matricula = $data["matricula"] ?? null;
+$startDate = $data["startDate"] ?? null;
+$endDate = $data["endDate"] ?? null;
+$torneioId = $data["torneioId"] ?? null;
 
 function iniciarDia(&$mapa, $data): void
 {
@@ -30,7 +34,7 @@ try {
                 GROUP BY rp.data
 ";
     $stmt = $pdo->prepare($sqlPIX);
-    $stmt->execute(['matricula' => $matricula, 'startDate' => $startDate, 'endDate' => $endDate]);
+    $stmt->execute([':matricula' => $matricula, ':startDate' => $startDate, ':endDate' => $endDate]);
     $pixResults = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     $sqlRec = "SELECT rr.data,
@@ -43,7 +47,7 @@ try {
                 GROUP BY rr.data
 ";
     $stmt = $pdo->prepare($sqlRec);
-    $stmt->execute(['matricula' => $matricula, 'startDate' => $startDate, 'endDate' => $endDate]);
+    $stmt->execute([':matricula' => $matricula, ':startDate' => $startDate, ':endDate' => $endDate]);
     $recResults = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     $sqlRegras = "SELECT rm.regras
@@ -52,9 +56,9 @@ try {
                     WHERE t.id = :torneio_id
 ";
     $stmt = $pdo->prepare($sqlRegras);
-    $stmt->execute(['torneioId' => $torneioId]);
-    $regrasResults = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    $regrasJSON = $recResults ? json_encode($regrasResults['regras']) : null;
+    $stmt->execute([':torneio_id' => $torneioId]);
+    $regrasResults = $stmt->fetchColumn();
+    $regrasJSON = $regrasResults ? json_decode($regrasResults, true) : null;
 
     foreach ($pixResults as $rows) {
         $data = $rows['data'];
@@ -76,6 +80,17 @@ try {
 
     $listaFinal = array_values($mapaHistorico);
 
+
+    // Debug Temporário
+    /*if ($regrasJSON === null) {
+        var_dump([
+            'Passo 1: Encontrou a linha?' => $regrasResults ? 'SIM' : 'NÃO',
+            'Passo 2: Tem a coluna regras?' => isset($regrasResults['regras']) ? 'SIM' : 'NÃO',
+            'Passo 3: Conteúdo bruto' => $regrasResults['regras'] ?? 'VAZIO',
+            'Passo 4: Erro do JSON' => json_last_error_msg()
+        ]);
+        exit;
+    }*/
 
     echo json_encode([
         'torneio' => [

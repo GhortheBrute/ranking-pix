@@ -62,10 +62,6 @@ export default function RankingTable({
                 // Regra Matriz: Vale a quantidade de transações únicas
                 pontos = item.pix.qtd;
             } else {
-                // Regra Local: Usa o objeto de regras (ou padrão 1 se não houver)
-                // Se você ainda não está passando 'regras' na Home, ele vai considerar 0 nos multiplicadores
-                // Para teste rápido, você pode trocar (regras?.pontuacao... || 0) por (regras?.pontuacao... || 1)
-
                 const p = regras?.pontuacao;
 
                 if (p) {
