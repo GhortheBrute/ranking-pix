@@ -55,10 +55,10 @@ export default function UploadPage() {
             const data = await uploadRankingFile(type, fileInputName, file);
 
             if (data.success) {
-                setMsg({ type: 'success', text: data.message });
+                setMsg({ type: 'success', text: data.message || 'Upload realizado com sucesso.'});
                 form.reset();
             } else if (data.error === 'operadores_inexistentes') {
-                setFilaIds(data.ids);
+                setFilaIds(data.ids || []);
             } else {
                 setMsg({ type: 'error', text: data.error || 'Erro ao processar o arquivo' });
             }
