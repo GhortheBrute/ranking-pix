@@ -6,7 +6,14 @@ import {
     ModeloRegraCriacao,
     Logs,
     Operador,
-    HistoryOperatorResponse
+    HistoryOperatorResponse,
+    DashboardStats,
+    TorneioProps,
+    TorneioPayload,
+    UploadType,
+    UploadResponse,
+    Usuario,
+    UsuarioPayload
 } from "@/types";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || '/ranking_pix/api';
@@ -108,5 +115,105 @@ export async function fetchOperadorHistory(matricula: number, startDate: string,
         method: 'POST',
         body: JSON.stringify({matricula, startDate, endDate, torneioId})
     });
+    return response.json();
+}
+
+// LOGIN
+export async function handleLoginData(username: string, password: string): Promise<{ sucesso: boolean, usuario: object, session_id_login: string, erro?: string }>{
+    const response = await fetch (`${API_BASE}/admin.php?acao=login`, {
+            method: 'POST',
+            body: JSON.stringify({ username, password })
+        });
+    return response.json();
+}
+
+// Dashboard_Home data
+export const fetchStatusData = async (): Promise<DashboardStats> => {
+    const response = await fetch(`${API_BASE}/dashboard_home.php`);
+    if (!response.ok) throw new Error('Falha ao buscar dados');
+    return response.json();
+}
+
+// TORNEIOS
+// fetch Torneios
+export const fetchTorneiosData = async (): Promise<TorneioProps[]> => {
+    const response = await fetch(`${API_BASE}/torneios.php`);
+    if (!response.ok) throw new Error('Falha ao buscar torneios');
+    return response.json();
+}
+
+// fetch Regras
+export const fetchTorneiosRegras = async (): Promise<ModeloRegra[]> => {
+    const response = await fetch(`${API_BASE}/regras.php`);
+    if (!response.ok) throw new Error('Falha ao buscar regras');
+    return response.json();
+}
+
+// handleSaveTorneios
+export async function handleSaveTorneios(payload: TorneioPayload): Promise<{ sucesso: boolean, erro?: string, id: number | null }>{
+    const response = await fetch (`${API_BASE}/torneios.php`, {
+            method: 'POST',
+            body: JSON.stringify(payload)
+        });
+    return response.json();
+}
+
+// Ativar/Desativar Torneio
+export async function ToggleTorneio(acao: string, id: number): Promise<{ success: boolean, error?: string }> {
+    const response = await fetch(`${API_BASE}/torneios.php`, {
+        method: 'POST',
+        body: JSON.stringify({acao, id})
+    });
+    return response.json();
+}
+
+// UPLOAD
+// Subir ARQUIVO
+export async function uploadRankingFile(type: UploadType, file_name: string, file: File): Promise<UploadResponse> {
+    const endpointMap = {
+        'PIX': 'upload_pix.php',
+        'RECARGA': 'upload_recarga.php'
+    };
+
+    const endpoint = endpointMap[type];
+
+    const formData = new FormData();
+    formData.append(file_name, file);
+    //formData.append('file_name', file_name);
+    //formData.append('csv_file', file);
+
+    const response = await fetch(`${API_BASE}/${endpoint}`, {
+        method: 'POST',
+        body: formData
+    });
+
+    if (!response.ok) throw new Error(`Erro ao enviar arquivo para ${endpoint}.`);
+
+    return response.json();
+}
+
+// Salvar
+export async function handleSaveUpload(payload: Operador): Promise<{ sucesso: boolean, erro?: string }>{
+    const response = await fetch (`${API_BASE}/operadores.php`, {
+            method: 'POST',
+            body: JSON.stringify(payload)
+        });
+    return response.json();
+}
+
+// USUARIOS
+// fetch
+export const fetchUsuariosData = async (): Promise<Usuario[]> => {
+    const response = await fetch(`${API_BASE}/usuarios.php`);
+    if (!response.ok) throw new Error('Falha ao buscar usuários');
+    return response.json();
+}
+
+// Save
+export async function handleSaveUsuario(payload: UsuarioPayload): Promise<{ sucesso: boolean, erro?: string }>{
+    const response = await fetch (`${API_BASE}/usuarios.php`, {
+            method: 'POST',
+            body: JSON.stringify(payload)
+        });
     return response.json();
 }

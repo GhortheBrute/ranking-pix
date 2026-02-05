@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Loader2 } from 'lucide-react';
+import { handleLoginData } from '@/services/api';
 
 export default function Login() {
     const [login, setLogin] = useState('');
@@ -15,12 +16,8 @@ export default function Login() {
         e.preventDefault();
         setLoading(true);
 
-        const res = await fetch ('/api/admin.php?acao=login', {
-            method: 'POST',
-            body: JSON.stringify({ login, senha })
-        });
         try{
-            const data = await res.json();
+            const data = await handleLoginData(login, senha);
 
             if(data.sucesso) {
                 localStorage.setItem('admin_token', JSON.stringify(data.usuario));

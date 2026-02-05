@@ -1,49 +1,11 @@
 'use client';
 
+import { fetchTorneiosData, fetchTorneiosRegras, handleSaveTorneios, ToggleTorneio } from "@/services/api";
+import { ModeloRegra, RegrasJSON, TorneioProps } from "@/types";
 import React, { useEffect, useState } from "react";
 
-interface RegrasJSON {
-    pontuacao: {
-        fator_qtd_pix: number;
-        fator_valor_pix: number;
-        fator_qtd_recarga: number;
-        fator_valor_recarga: number;
-        peso_fds: number;
-    };
-    bonus: {
-        meta_pix_qtd: number;     // Ex: A cada 10 pix
-        meta_pix_valor: number;
-        pontos_bonus_pix_qtd: number; // Ganha 50 pontos
-        pontos_bonus_pix_valor: number; // Ganha 50 pontos
-        meta_recarga_qtd: number;
-        meta_recarga_valor: number; // Ex: A cada R$ 100
-        pontos_bonus_recarga_qtd: number;
-        pontos_bonus_recarga_valor: number;
-    };
-    premios: {
-        ativar_roleta: boolean;
-        pontos_para_roleta: number;
-    };
-}
 
-// Estrutura do Modelo no Banco
-interface ModeloRegra {
-    id: number;
-    nome: string;
-    ativo: number;
-    regras: RegrasJSON | string; // Pode vir como string do banco
-}
 
-interface TorneioProps {
-    id: number;
-    nome: string;
-    data_inicio: string;
-    data_fim: string;
-    regra_id: number;
-    regra_nome?: string;
-    ativo: number; // Vem como número do banco
-    criado_em: string;
-}
 
 // Componente auxiliar para exibir os detalhes da regra
 const RegraTooltip = ({ regra }: { regra: RegrasJSON }) => (
@@ -85,14 +47,10 @@ export default function TorneioPage() {
     const carregarDados = async () => {
         setLoading(true);
         try {
-            const [resTorneios, resRegras] = await Promise.all([
-                fetch(`/api/torneios.php`),
-                fetch(`/api/regras.php`),
-            ])
-            const dataTorneios = await resTorneios.json();
-            const dataRegras = await resRegras.json();
+            const dataTorneios = await fetchTorneiosData();
+            const dataRegras = await fetchTorneiosRegras();
 
-            const regrasFormatadas = dataRegras.map((m: any) => ({
+            const regrasFormatadas = dataRegras.map((m: ModeloRegra) => ({
                 ...m,
                 regras: typeof m.regras === 'string' ? JSON.parse(m.regras) : m.regras
             }));
@@ -139,16 +97,16 @@ export default function TorneioPage() {
                 method: 'POST',
                 body: JSON.stringify(payload),
             });
-            const data = await res.json();
+            const data = await handleSaveTorneios(payload);
 
-            if (data.success || data.id) {
+            if (data.sucesso || data.id) {
                 await carregarDados();
                 setIsModalOpen(false);
             } else {
-                alert('Erro: ' + data.error);
+                alert('Erro: ' + data.erro);
             }
         } catch (error) {
-            alert('Erro de conexão.');
+            alert('Erro de conexão.' + error);
         };
     }
 
@@ -156,10 +114,7 @@ export default function TorneioPage() {
         const handleToggle = async (id: number) => {
             if (!confirm('Deseja alterar o status deste modelo?')) return;
             try {
-                await fetch('/api/torneios.php', {
-                    method: 'POST',
-                    body: JSON.stringify({ acao: 'toggle_status', id })
-                });
+                await ToggleTorneio('toggle_status', id);
                 await carregarDados();
             } catch (error) {
                 console.error(error);

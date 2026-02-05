@@ -2,7 +2,7 @@
 
 import React from 'react';
 import SearchInput from '@/components/SearchInput';
-import TableLogs from '@/components/TableLogs';
+import TableLogs from '@/components/Logs/TableLogs';
 import {useLogs} from '@/hooks/useLogs';
 
 

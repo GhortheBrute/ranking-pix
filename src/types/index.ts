@@ -245,3 +245,67 @@ export interface HistoryOperatorResponse {
     };
     historico: HistoryDay[];
 }
+
+
+export interface FetchStatusProps {
+    torneio: [{
+        ativo: boolean,
+        nome: string,
+        fim: string,
+        id: number
+    }];
+    operadores: number;
+    ultima_atualizacao: string;
+}
+
+export interface DashboardStats {
+    torneio: {
+        ativo: boolean;
+        nome?: string;
+        fim?: string;
+        id?: number;
+    };
+    operadores: number;
+    ultima_atualizacao: string;
+}
+
+export interface TorneioProps {
+    id: number;
+    nome: string;
+    data_inicio: string;
+    data_fim: string;
+    regra_id: number;
+    regra_nome?: string;
+    ativo: number; // Vem como número do banco
+    criado_em: string;
+}
+
+export interface TorneioPayload {
+    id: number | null;
+    nome: string;
+    data_inicio: string;
+    data_fim: string;
+    regra_id: number;
+    is_edit: boolean;
+}
+
+export interface UploadResponse {
+    success: boolean;
+    message?: string;
+    error?: string;
+    ids?: string[];
+}
+
+export type UploadType = 'PIX' | 'RECARGA';
+
+export interface Usuario {
+    id: number;
+    username: string;
+    role: string;
+    ativo?: number;
+}
+
+export interface UsuarioPayload extends Usuario{
+    is_edit: boolean;
+    password: string;
+}

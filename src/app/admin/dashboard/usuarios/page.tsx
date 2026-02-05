@@ -1,14 +1,11 @@
 'use client';
 
 import React, {useState, useEffect, useMemo} from 'react';
-import { Plus, Edit, UserX, UserCheck, X, Save, Search } from 'lucide-react';
+import { Plus, Edit, X, Save, Search } from 'lucide-react';
+import { fetchUsuariosData, handleSaveUsuario } from '@/services/api';
+import { Usuario } from '@/types';
 
-interface Usuario {
-    id: number;
-    username: string;
-    role: 'admin' | 'user';
-    ativo: number; // Adicionei ativo para o toggle funcionar
-}
+
 
 export default function UsersPage() {
     const [usuarios, setUsuarios] = useState<Usuario[]>([]);
@@ -26,8 +23,7 @@ export default function UsersPage() {
 
     const fetchUsuarios = async () => {
         try {
-            const res = await fetch('/api/usuarios.php');
-            const data = await res.json();
+            const data = await fetchUsuariosData();
             setUsuarios(data);
         } catch (error) {
             console.error('Erro ao buscar usuarios:', error);
@@ -65,11 +61,7 @@ export default function UsersPage() {
                 is_edit: isEditing
             };
 
-            const res = await fetch('/api/usuarios.php', {
-                method: 'POST',
-                body: JSON.stringify(payload)
-            });
-            const data = await res.json();
+            const data = await handleSaveUsuario(payload);
 
             if (data.sucesso) {
                 fetchUsuarios();
@@ -78,7 +70,7 @@ export default function UsersPage() {
                 alert(data.erro || 'Erro ao salvar');
             }
         } catch (error) {
-            alert('Erro de conexão');
+            alert('Erro de conexão' + error);
         }
     };
 

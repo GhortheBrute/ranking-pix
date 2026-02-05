@@ -3,17 +3,10 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Activity, ArrowRight, CalendarClock, Trophy, Users } from 'lucide-react';
+import { fetchStatusData } from '@/services/api';
+import { DashboardStats } from '@/types';
 
-interface DashboardStats {
-    torneio: {
-        ativo: boolean;
-        nome?: string;
-        fim?: string;
-        id?: number;
-    };
-    operadores: number;
-    ultima_atualizacao: string;
-}
+
 
 export default function DashboardHome() {
     const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -35,8 +28,7 @@ export default function DashboardHome() {
         // Busca dados da API
         async function fetchStats() {
             try {
-                const res = await fetch('/api/dashboard_home.php');
-                const data = await res.json();
+                const data = await fetchStatusData();
                 setStats(data);
             } catch (error) {
                 console.error('Erro ao buscar stats', error);

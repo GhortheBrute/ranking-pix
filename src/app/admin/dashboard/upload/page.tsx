@@ -1,5 +1,6 @@
 'use client';
 
+import { handleSaveUpload, uploadRankingFile } from '@/services/api';
 import {FileType, CheckCircle, AlertCircle, Loader2, UploadCloud, X, Save} from 'lucide-react';
 import React, {useEffect, useState} from 'react';
 
@@ -20,7 +21,7 @@ export default function UploadPage() {
     // Função genérica de upload
     const handleUpload = async (
         e: React.FormEvent,
-        endpoint: string,
+        type: "PIX" | "RECARGA",
         fileInputName: string,
         setLoading: (v: boolean) => void,
         setMsg: (v: {type: string, text: string }) => void
@@ -50,12 +51,8 @@ export default function UploadPage() {
         formData.append(fileInputName, file);
 
         try{
-            const res = await fetch(endpoint,{
-                method: 'POST',
-                body: formData,
-            });
 
-            const data = await res.json();
+            const data = await uploadRankingFile(type, fileInputName, file);
 
             if (data.success) {
                 setMsg({ type: 'success', text: data.message });
@@ -85,11 +82,7 @@ export default function UploadPage() {
                     ...formData,
                 };
     
-                const res = await fetch('/api/operadores.php', {
-                    method: 'POST',
-                    body: JSON.stringify(payload)
-                });
-                const data = await res.json();
+                const data = await handleSaveUpload(payload);
     
                 if (data.sucesso) {
                     setIsModalOpen(false); // Fecha modal
@@ -101,7 +94,7 @@ export default function UploadPage() {
                     alert(data.erro || 'Erro ao salvar');
                 }
             } catch (error) {
-                alert('Erro de conexão');
+                alert('Erro de conexão' + error);
         }
     };
 
@@ -129,7 +122,7 @@ export default function UploadPage() {
                         </div>
                     </div>
 
-                    <form onSubmit={(e) => handleUpload(e, '/api/upload_pix.php', 'arquivo_pix_csv', setLoadingPix, setMsgPix)}>
+                    <form onSubmit={(e) => handleUpload(e, 'PIX', 'arquivo_pix_csv', setLoadingPix, setMsgPix)}>
                         <div className="mb-4">
                             <label className="block text-sm font-medium text-slate-700 mb-2">Selecione o arquivo</label>
                             <input 
@@ -168,7 +161,7 @@ export default function UploadPage() {
                         </div>
                     </div>
 
-                    <form onSubmit={(e) => handleUpload(e, '/api/upload_recarga.php', 'arquivo_recarga_csv', setLoadingRecarga, setMsgRecarga)}>
+                    <form onSubmit={(e) => handleUpload(e, 'RECARGA', 'arquivo_recarga_csv', setLoadingRecarga, setMsgRecarga)}>
                         <div className="mb-4">
                             <label className="block text-sm font-medium text-slate-700 mb-2">Selecione o arquivo</label>
                             <input 
