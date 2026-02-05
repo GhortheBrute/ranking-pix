@@ -278,6 +278,7 @@ export interface TorneioProps {
     regra_nome?: string;
     ativo: number; // Vem como número do banco
     criado_em: string;
+    tipo: 'LOCAL' | 'MATRIZ';
 }
 
 export interface TorneioPayload {
@@ -287,6 +288,7 @@ export interface TorneioPayload {
     data_fim: string;
     regra_id: number;
     is_edit: boolean;
+    tipo: string;
 }
 
 export interface UploadResponse {

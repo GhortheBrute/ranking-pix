@@ -52,7 +52,7 @@ export async function savePesquisas(torneioId: number, itens: ItemPesquisa[]): P
 // --- REGRAS ---
 // Buscar a lista de Regras
 export const fetchRegras = async (): Promise<ModeloRegra[]> => {
-    const response = await fetch(`/api/regras.php`);
+    const response = await fetch(`${API_BASE}/regras.php`);
     if (!response.ok) throw new Error('Falha ao buscar dados do modelo.');
     return response.json();
 }

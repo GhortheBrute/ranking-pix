@@ -1,7 +1,7 @@
 'use client';
 
 import { fetchTorneiosData, fetchTorneiosRegras, handleSaveTorneios, ToggleTorneio } from "@/services/api";
-import { ModeloRegra, RegrasJSON, TorneioProps } from "@/types";
+import { ModeloRegra, RegrasJSON, TorneioPayload, TorneioProps } from "@/types";
 import React, { useEffect, useState } from "react";
 
 
@@ -41,7 +41,7 @@ export default function TorneioPage() {
 
     // Estado do Formulário
     const [editId, setEditId] = useState<number | null>(null);
-    const [formData, setFormData] = useState({ nome: '', data_inicio: '', data_fim: '', regra_id: 1 });
+    const [formData, setFormData] = useState({ nome: '', data_inicio: '', data_fim: '', regra_id: 1, tipo: 'LOCAL' });
 
     // Carrega a Lista
     const carregarDados = async () => {
@@ -71,11 +71,11 @@ export default function TorneioPage() {
         if (torneio) {
             // Edição
             setEditId(torneio.id);
-            setFormData({ data_fim: torneio.data_fim, data_inicio: torneio.data_inicio, regra_id: torneio.regra_id, nome: torneio.nome });
+            setFormData({ data_fim: torneio.data_fim, data_inicio: torneio.data_inicio, regra_id: torneio.regra_id, nome: torneio.nome, tipo: torneio.tipo });
         } else {
             // Novo
             setEditId(null);
-            setFormData({ data_fim: "", data_inicio: "", nome: "", regra_id: 1 })
+            setFormData({ data_fim: "", data_inicio: "", nome: "", regra_id: 1, tipo: 'LOCAL' })
         }
         setIsModalOpen(true);
     };
@@ -84,19 +84,15 @@ export default function TorneioPage() {
     const handleSave = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            const payload = {
+            const payload: TorneioPayload = {
                 id: editId,
                 nome: formData.nome,
                 data_inicio: formData.data_inicio,
                 data_fim: formData.data_fim,
                 regra_id: Number(formData.regra_id),
                 is_edit: !!editId,
+                tipo: formData.tipo
             };
-
-            const res = await fetch(`/api/torneios.php`, {
-                method: 'POST',
-                body: JSON.stringify(payload),
-            });
             const data = await handleSaveTorneios(payload);
 
             if (data.sucesso || data.id) {
@@ -228,6 +224,12 @@ export default function TorneioPage() {
                                                 {torneio.regra_nome || getNomeRegra(torneio.regra_id)}
                                             </span>
                                         </div>
+                                        <div className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-100">
+                                            <span className="text-gray-800">Tipo:</span>
+                                            <span className={`font-medium ${torneio.tipo === 'MATRIZ' ? 'text-purple-600' : 'text-blue-600'}`}>
+                                                {torneio.tipo}
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -301,6 +303,19 @@ export default function TorneioPage() {
                                             onChange={(e) => setFormData({ ...formData, data_fim: e.target.value })}
                                         />
                                     </div>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Tipo de Torneio</label>
+                                    <select
+                                        required
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white"
+                                        value={formData.tipo}
+                                        onChange={(e) => setFormData({ ...formData, tipo: e.target.value as 'LOCAL' | 'MATRIZ' })}
+                                    >
+                                        <option value="LOCAL">LOCAL</option>
+                                        <option value="MATRIZ">MATRIZ</option>
+                                    </select>
                                 </div>
 
                                 <div>

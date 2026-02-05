@@ -220,7 +220,7 @@ export default function RankingTable({
                                                             </>
                                                         )}
                                                     </tr>
-                                                    {expandedRow === item.matricula && (
+                                                    {expandedRow === item.matricula && tipo === 'LOCAL' && (
                                                         <tr className="bg-blue-50/30 border-b border-gray-200 animate-in fade-in zoom-in-95 duration-200">
                                                             <td colSpan={8} className="p-4 pt-0">
                                                                 <div className="bg-white rounded-lg shadow-inner border border-gray-200 p-4 min-h-[200px] relative">

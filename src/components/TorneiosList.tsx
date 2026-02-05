@@ -25,17 +25,6 @@ export function TorneiosList({ torneioVigente, outrosTorneios, onSelect, loading
             <h1 className="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-2">
                 📊 Lançamento de Pesquisas
             </h1>
-
-            {/* --- DESAFIO --- */}
-            {/* Cola aqui os blocos do "Torneio Vigente" e "Outros Torneios" 
-                que estão no teu arquivo page.tsx original. 
-                
-                Lembra-te de substituir a chamada antiga:
-                onClick={() => handleSelectTorneio(t)} 
-                
-                Pela nova prop:
-                onClick={() => onSelect(t)}
-            */}
             {torneioVigente && (
                     <div className="mb-8">
                         <h2 className="text-sm font-bold text-slate-500 uppercase mb-3">Torneio Vigente</h2>
