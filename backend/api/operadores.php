@@ -7,7 +7,7 @@ $method = $_SERVER['REQUEST_METHOD'];
 // 1. LISTAR OPERADORES (GET)
 if ($method === 'GET') {
     // Traz todos, ordenados por nome
-    $stmt = $pdo->query("SELECT * FROM operadores ORDER BY nome ASC");
+    $stmt = $pdo->query("SELECT * FROM rank_operadores ORDER BY nome ASC");
     $operadores = $stmt->fetchAll(PDO::FETCH_ASSOC);
     echo json_encode($operadores);
     exit;

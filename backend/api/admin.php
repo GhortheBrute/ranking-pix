@@ -31,6 +31,7 @@ if ($acao === 'login' && $method === 'POST') {
         if ($senhaValida) {
             unset($user['password']); // Nunca devolva o hash para o frontend
             $_SESSION['admin_id'] = $user['id'];
+            $_SESSION['admin_role'] = $user['role'];
             $_SESSION['role'] = $user['role'];
             session_write_close();
             echo json_encode([

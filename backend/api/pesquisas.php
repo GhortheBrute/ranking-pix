@@ -24,7 +24,7 @@ if ($method === 'GET') {
 
         // Busca torneios ativos, ordenados por data DESC
         $sql = "SELECT id, nome, data_inicio, data_fim
-                FROM torneios
+                FROM rank_torneios
                 WHERE ativo = 1
                 ORDER BY data_inicio DESC";
         $stmt = $pdo->query($sql);

@@ -16,7 +16,7 @@ $admin_id = $_SESSION['admin_id'] ?? 0;
 // 1. LISTAR USUÁRIOS (GET)
 if ($method === 'GET') {
     // Traz todos, ordenados por nome
-    $stmt = $pdo->query("SELECT id, username, role FROM usuarios ORDER BY username ASC");
+    $stmt = $pdo->query("SELECT id, username, role FROM rank_usuarios ORDER BY username ASC");
     $usuarios = $stmt->fetchAll(PDO::FETCH_ASSOC);
     echo json_encode($usuarios);
     exit;

@@ -46,25 +46,28 @@ if ($method === 'POST') {
         if (isset($data->is_edit) && $data->is_edit === true) {
             // Atualiza Nome e Apelido
             $sql = "UPDATE rank_torneios 
-                    SET nome = ?, data_inicio=?, data_fim=?, regra_id = ? 
+                    SET nome = ?, data_inicio=?, data_fim=?, regra_id = ?, tipo = ?
                     WHERE id = ?";
             $stmt = $pdo->prepare($sql);
             $stmt->execute([
                 $data->nome,
                 $data->data_inicio,
                 $data->data_fim,
-                $data->regra_id
+                $data->regra_id,
+                $data->tipo,
+                $data->id
             ]);
             logAdmin($pdo, $_SESSION['admin_id'], 'atualizar_torneio', ['alvo' => $data->nome]);
         } else {
             // Cria Novo
-            $sql = "INSERT INTO rank_torneios ( nome, data_inicio, data_fim, regra_id) VALUES ( ?, ?, ?, ?)";
+            $sql = "INSERT INTO rank_torneios ( nome, data_inicio, data_fim, regra_id, tipo) VALUES ( ?, ?, ?, ?, ?)";
             $stmt = $pdo->prepare($sql);
             $stmt->execute([
                 $data->nome,
                 $data->data_inicio,
                 $data->data_fim,
-                $data->regra_id
+                $data->regra_id,
+                $data->tipo
             ]);
             logAdmin($pdo, $_SESSION['admin_id'], 'criar_torneio', ['alvo' => $data->nome]);
         }
@@ -72,7 +75,7 @@ if ($method === 'POST') {
         echo json_encode(['success' => true]);
     } catch (Exception $e) {
         if ($e->getCode() == 23000) {
-            echo json_encode(['sucesso' => false, 'erro' => 'Já existe um registro com esse nome.']);
+            echo json_encode(['success' => false, 'error' => 'Já existe um registro com esse nome.']);
         }
         echo json_encode(['success' => false, 'error' => $e->getMessage()]);
     }

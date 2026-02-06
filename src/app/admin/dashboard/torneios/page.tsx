@@ -95,11 +95,11 @@ export default function TorneioPage() {
             };
             const data = await handleSaveTorneios(payload);
 
-            if (data.sucesso || data.id) {
+            if (data.success || data.id) {
                 await carregarDados();
                 setIsModalOpen(false);
             } else {
-                alert('Erro: ' + data.erro);
+                alert('Erro: ' + data.error);
             }
         } catch (error) {
             alert('Erro de conexão.' + error);
@@ -145,7 +145,7 @@ export default function TorneioPage() {
 
                 {/* Grid de Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {torneios.map((torneio, index) => {
+                    {torneios.map((torneio: TorneioProps, index: number) => {
                         // Encontra a regra completa na lista de modelos
                         const regraCompleta = modelos.find(m => m.id === torneio.regra_id);
                         // Parse por garantia

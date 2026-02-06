@@ -41,7 +41,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     // Função de logout
     const handleLogout = () => {
         localStorage.removeItem('admin_token');
-        router.push('/admin');
+        router.push('/');
     };
 
     // Definição dos itens do menu
