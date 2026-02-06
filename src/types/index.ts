@@ -198,12 +198,13 @@ export interface ItemSizeSelectProps {
     totalPages: number;
 }
 
-
 export interface PaginatedButtonsProps {
     currentPage: number;
     setCurrentPage: React.Dispatch<React.SetStateAction<number>>;
     totalPages: number;
 }
+
+export type PaginatedBarProps = ItemSizeSelectProps & PaginatedButtonsProps;
 
 export interface OperadoresTableProps {
     loading: boolean;
@@ -310,4 +311,26 @@ export interface Usuario {
 export interface UsuarioPayload extends Usuario{
     is_edit: boolean;
     password: string;
+}
+
+export interface UserFormData {
+    id: number;
+    username: string;
+    password: string;
+    role: string;
+}
+
+export interface UserModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+    isEditing: boolean;
+    formData: UserFormData;
+    setFormData: (data: UserFormData) => void;
+    onSave: (e: React.FormEvent) => void;
+}
+
+export interface UsersTableProps {
+    loading: boolean;
+    users: Usuario[];
+    onEdit: (user: Usuario) => void;
 }
