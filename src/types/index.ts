@@ -334,3 +334,31 @@ export interface UsersTableProps {
     users: Usuario[];
     onEdit: (user: Usuario) => void;
 }
+
+export interface UploadCardsProps {
+    title: string;
+    description: string;
+    type: UploadType;
+    inputName: string;
+    state: UploadState;
+    onUpload: (e: React.FormEvent, type: UploadType) => Promise<void>;
+    themeColor: 'green' | 'blue';
+}
+
+export interface UploadState {
+    loading: boolean;
+    msg: {
+        type: string;
+        text: string
+    };
+}
+
+export interface OperatorModalProps{
+    isOpen: boolean;
+    onClose: () => void;
+    formData: Operador;
+    setFormData: (data: Operador) => void;
+    onSave: (e: React.FormEvent) => void;
+    isEdit?: boolean;
+    lockMatricula: boolean;
+}
