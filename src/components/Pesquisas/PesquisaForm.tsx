@@ -2,7 +2,7 @@
 
 import { PesquisaFormProps } from '@/types';
 import { ArrowLeft, Save, Trash2 } from 'lucide-react';
-import { OperadorSelect } from './OperadorSelect';
+import { OperadorSelect } from '@/components/OperadorSelect';
 
 export function PesquisaForm({
     torneio,

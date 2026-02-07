@@ -3,8 +3,8 @@
 import React from 'react';
 import { Plus } from 'lucide-react';
 import { useRegras } from '@/hooks/useRegras';
-import RegrasLista from '@/components/RegrasLista';
-import RegrasModal from '@/components/RegrasModal';
+import RegrasLista from '@/components/Rules/RegrasLista';
+import RegrasModal from '@/components/Rules/RegrasModal';
 
 export default function RegrasPage() {
     // 1. Conectamos o "Cérebro" (Hook)

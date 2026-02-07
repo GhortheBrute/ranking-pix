@@ -1,7 +1,7 @@
 'use client';
 
-import { TorneiosList } from '@/components/TorneiosList';
-import { PesquisaForm } from '@/components/PesquisaForm';
+import { TorneiosList } from '@/components/Pesquisas/TorneiosList';
+import { PesquisaForm } from '@/components/Pesquisas/PesquisaForm';
 import {usePesquisaController} from "@/hooks/usePesquisaController";
 
 

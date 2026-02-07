@@ -391,3 +391,11 @@ export interface TournamentModalProps {
     modelos: ModeloRegra[];
     onClose: () => void;
 }
+
+export interface OperatorsTableProps {
+    loading: boolean,
+    operators:Operador[];
+    onEdit: (op: Operador) => void;
+    onToggle: (id: string) => void;
+    filteredOps: Operador[];
+}
