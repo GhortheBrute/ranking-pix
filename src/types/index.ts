@@ -362,3 +362,32 @@ export interface OperatorModalProps{
     isEdit?: boolean;
     lockMatricula: boolean;
 }
+
+export interface TournamentCardsProps {
+    torneios: TorneioProps[];
+    modelos: ModeloRegra[];
+    onToggle: (id: number) => void;
+    onOpen: (torneio: TorneioProps) => void;
+}
+
+export interface TournamentModalProps {
+    isOpen: boolean;
+    editId?: number;
+    onSave: (e: React.FormEvent) => void;
+    formData: {
+        nome: string;
+        data_inicio: string;
+        data_fim: string;
+        regra_id: number;
+        tipo: string;
+    };
+    setFormData: (data: {
+        nome: string;
+        data_inicio: string;
+        data_fim: string;
+        regra_id: number;
+        tipo: string;
+    }) => void;
+    modelos: ModeloRegra[];
+    onClose: () => void;
+}
