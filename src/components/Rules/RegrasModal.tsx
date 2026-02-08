@@ -3,7 +3,7 @@
 import React from 'react';
 import { Calculator, Edit, Gift, Plus, Save, Trophy, X } from 'lucide-react';
 import { RegrasModalProps } from "@/types";
-import RuleInput from '@/components/RuleInput';
+import RuleInput from '@/components/Rules/RuleInput';
 import BonusInput from "@/components/BonusInput";
 import DiasEspeciaisInput from "@/components/DiasEspeciaisInput";
 
@@ -24,6 +24,23 @@ export default function RegrasModal({
 }: RegrasModalProps) {
 
     if (!isOpen) return null;
+
+    // Função Helper para atualizar níveis profundos (ex: pontuacao > pix > qtd > pontos)
+    const updateDeepRegra = (categoria: 'pontuacao' | 'bonus', tipo: string, subtipo: string, campo: string, valor: any) => {
+        setFormRegras(prev => ({
+            ...prev,
+            [categoria]: {
+                ...prev[categoria],
+                [tipo]: {
+                    ...prev[categoria][tipo as keyof typeof prev[categoria]], // ex: pix
+                    [subtipo]: {
+                        ...(prev[categoria][tipo as keyof typeof prev[categoria]] as any)[subtipo], // ex: qtd
+                        [campo]: Number(valor) // ex: pontos
+                    }
+                }
+            }
+        }));
+    };
 
     return (
         <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 animate-in fade-in">
@@ -87,15 +104,17 @@ export default function RegrasModal({
                                         <RuleInput
                                             labelPontos="Pontos"
                                             labelReferencia="PIX"
-                                            value={formRegras.pontuacao.fator_qtd_pix}
-                                            onChange={(v) => updateRegra('pontuacao', 'fator_qtd_pix', v)}
+                                            values={formRegras.pontuacao.pix.qtd}
+                                            onChangePoints={(v) => updateRegra('pontuacao', 'pix.qtd.pontos', v)}
+                                            onChangeReference={(v) => updateRegra('pontuacao', 'pix.qtd.valor', v)}
                                         />
                                         <RuleInput
                                             labelPontos="Pontos"
                                             labelReferencia="Reais (R$)"
                                             step={10}
-                                            value={formRegras.pontuacao.fator_valor_pix}
-                                            onChange={(v) => updateRegra('pontuacao', 'fator_valor_pix', v)}
+                                            values={formRegras.pontuacao.pix.monetario}
+                                            onChangePoints={(v) => updateRegra('pontuacao', 'pix.monetario.pontos', v)}
+                                            onChangeReference={(v) => updateRegra('pontuacao', 'pix.monetario.valor', v)}
                                         />
                                     </div>
                                 </div>
@@ -107,16 +126,17 @@ export default function RegrasModal({
                                         <RuleInput
                                             labelPontos="Pontos"
                                             labelReferencia="Recargas"
-                                            value={formRegras.pontuacao.fator_qtd_recarga}
-                                            onChange={(v) => updateRegra('pontuacao', 'fator_qtd_recarga', v)}
+                                            values={formRegras.pontuacao.recarga.qtd}
+                                            onChangePoints={(v) => updateRegra('pontuacao', 'recarga.qtd.pontos', v)}
+                                            onChangeReference={(v) => updateRegra('pontuacao', 'recarga.qtd.valor', v)}
                                         />
                                         <RuleInput
                                             labelPontos="Pontos"
                                             labelReferencia="Reais (R$)"
                                             step={15}
-                                            min={15}
-                                            value={formRegras.pontuacao.fator_valor_recarga}
-                                            onChange={(v) => updateRegra('pontuacao', 'fator_valor_recarga', v)}
+                                            values={formRegras.pontuacao.recarga.monetario}
+                                            onChangePoints={(v) => updateRegra('pontuacao', 'recarga.monetario.pontos', v)}
+                                            onChangeReference={(v) => updateRegra('pontuacao', 'recarga.monetario.valor', v)}
                                         />
                                     </div>
                                 </div>
@@ -142,8 +162,8 @@ export default function RegrasModal({
                                         <BonusInput
                                             labelMeta="Meta de Volume"
                                             unitMeta="transações"
-                                            meta={formRegras.bonus.meta_pix_qtd}
-                                            premio={formRegras.bonus.pontos_bonus_pix_qtd}
+                                            meta={formRegras.bonus.pix.qtd.meta}
+                                            premio={formRegras.bonus.pix.qtd.pontos}
                                             onMetaChange={v => updateRegra('bonus', 'meta_pix_qtd', v)}
                                             onPremioChange={v => updateRegra('bonus', 'pontos_bonus_pix_qtd', v)}
                                         />
@@ -151,8 +171,8 @@ export default function RegrasModal({
                                             labelMeta="Meta de Valor"
                                             unitMeta="R$"
                                             stepMeta={50}
-                                            meta={formRegras.bonus.meta_pix_valor}
-                                            premio={formRegras.bonus.pontos_bonus_pix_valor}
+                                            meta={formRegras.bonus.pix.monetario.meta}
+                                            premio={formRegras.bonus.pix.monetario.pontos}
                                             onMetaChange={v => updateRegra('bonus', 'meta_pix_valor', v)}
                                             onPremioChange={v => updateRegra('bonus', 'pontos_bonus_pix_valor', v)}
                                         />
@@ -166,8 +186,8 @@ export default function RegrasModal({
                                         <BonusInput
                                             labelMeta="Meta de Volume"
                                             unitMeta="recargas"
-                                            meta={formRegras.bonus.meta_recarga_qtd}
-                                            premio={formRegras.bonus.pontos_bonus_recarga_qtd}
+                                            meta={formRegras.bonus.recarga.qtd.meta}
+                                            premio={formRegras.bonus.recarga.qtd.pontos}
                                             onMetaChange={v => updateRegra('bonus', 'meta_recarga_qtd', v)}
                                             onPremioChange={v => updateRegra('bonus', 'pontos_bonus_recarga_qtd', v)}
                                         />
@@ -175,8 +195,8 @@ export default function RegrasModal({
                                             labelMeta="Meta de Valor"
                                             unitMeta="R$"
                                             stepMeta={15}
-                                            meta={formRegras.bonus.meta_recarga_valor}
-                                            premio={formRegras.bonus.pontos_bonus_recarga_valor}
+                                            meta={formRegras.bonus.recarga.monetario.meta}
+                                            premio={formRegras.bonus.recarga.monetario.pontos}
                                             onMetaChange={v => updateRegra('bonus', 'meta_recarga_valor', v)}
                                             onPremioChange={v => updateRegra('bonus', 'pontos_bonus_recarga_valor', v)}
                                         />

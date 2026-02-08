@@ -25,14 +25,26 @@ export function getFracaoInicial(fator: number) {
 }
 
 // 🆕 Função Helper para exibir na Lista
-export function formatarFatorAmigavel(fator: number, labelItem: string, singularItem?: string): string {
-    const { numerador, denominador } = getFracaoInicial(fator);
+export function formatarFatorAmigavel(
+    points: number,
+    reference: number,
+    labelItem: string,
+    singularItem?: string,
+    money?: boolean
+    ): string {
 
-    if (numerador === 0) return "0 pts";
+    if (points === 0 || reference === 0) return "0 pts";
 
-    const pontosLabel = numerador === 1 ? "ponto" : "pontos";
-    const itemLabel = denominador === 1 ? (singularItem || labelItem) : labelItem;
+    let formatedValue = reference.toString();
+
+    const pointsLabel = points === 1 ? "ponto" : "pontos";
+    const itemLabel = (reference === 1 && singularItem) ? singularItem : labelItem;
+
+    if (money) {
+        formatedValue = new Intl.NumberFormat('pt-BR', { style: 'currency', currency:'BRL' }).format(reference);
+        return `${points} ${pointsLabel} a cada ${formatedValue}`;
+    }
 
     // Ex: "1 ponto a cada 50 PIX"
-    return `${numerador} ${pontosLabel} a cada ${denominador} ${itemLabel}`;
+    return `${points} ${pointsLabel} a cada ${reference} ${itemLabel}`;
 }

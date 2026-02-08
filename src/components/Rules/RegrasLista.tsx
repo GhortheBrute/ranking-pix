@@ -61,15 +61,13 @@ export default function RegrasLista({
                                     <p className="flex justify-between">
                                         <span>Qtd:</span> 
                                         <b className="text-slate-700">
-                                            {formatarFatorAmigavel(regras.pontuacao.fator_qtd_pix, "PIX", "PIX")}
+                                            {formatarFatorAmigavel(regras.pontuacao.pix.qtd.pontos, regras.pontuacao.pix.qtd.valor, "PIX", "PIX")}
                                         </b>
                                     </p>
                                     <p className="flex justify-between">
                                         <span>Valor:</span>
                                         <b className="text-slate-700">
-                                            {regras.pontuacao.fator_valor_pix > 0 
-                                                ? `1 ponto a cada ${new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(regras.pontuacao.fator_valor_pix)}` 
-                                                : '0 pontos'}
+                                            {formatarFatorAmigavel(regras.pontuacao.pix.monetario.pontos, regras.pontuacao.pix.monetario.valor, "PIX", "PIX", true)}
                                         </b>
                                     </p>
                                 </div>
@@ -82,15 +80,13 @@ export default function RegrasLista({
                                     <p className="flex justify-between">
                                         <span>Qtd:</span>
                                         <b className="text-slate-700">
-                                            {formatarFatorAmigavel(regras.pontuacao.fator_qtd_recarga, "Recargas", "Recarga")}
+                                            {formatarFatorAmigavel(regras.pontuacao.recarga.qtd.pontos, regras.pontuacao.recarga.qtd.valor,  "Recargas", "Recarga")}
                                         </b>
                                     </p>
                                     <p className="flex justify-between">
                                         <span>Valor:</span>
                                         <b className="text-slate-700">
-                                            {regras.pontuacao.fator_valor_recarga > 0 
-                                                ? `1 ponto a cada ${new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(regras.pontuacao.fator_valor_recarga)}` 
-                                                : '0 pontos'}
+                                            {formatarFatorAmigavel(regras.pontuacao.recarga.monetario.pontos, regras.pontuacao.recarga.monetario.valor, "Recargas", "Recarga", true)}
                                         </b>
                                     </p>
                                 </div>

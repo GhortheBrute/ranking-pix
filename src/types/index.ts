@@ -63,32 +63,49 @@ export interface DiaEspecial {
     fator: number;
 }
 
+export interface PontuacaoRegrasJSON {
+    pontos: number;
+    valor: number;
+}
+
+export interface MetasRegrasJSON {
+    meta: number;
+    pontos: number;
+}
+
 export interface RegrasJSON {
     pontuacao: {
-        fator_qtd_pix: number;
-        fator_valor_pix: number;
-        fator_qtd_recarga: number;
-        fator_valor_recarga: number;
-        fator_qtd_pesquisas: number;
-        dias_especiais: DiaEspecial[];
-    };
+        pix: {
+            qtd: PontuacaoRegrasJSON,
+            monetario: PontuacaoRegrasJSON
+        },
+        recarga: {
+            qtd: PontuacaoRegrasJSON,
+            monetario: PontuacaoRegrasJSON
+        },
+        dias_especiais: DiaEspecial[],
+        pesquisas: {
+            qtd: PontuacaoRegrasJSON,
+        }
+    },
     bonus: {
-        meta_pix_qtd: number;
-        meta_pix_valor: number;
-        pontos_bonus_pix_qtd: number;
-        pontos_bonus_pix_valor: number;
-        meta_recarga_qtd: number;
-        meta_recarga_valor: number;
-        pontos_bonus_recarga_qtd: number;
-        pontos_bonus_recarga_valor: number;
-        meta_pesquisa: number;
-        pontos_bonus_pesquisa: number;
-    };
+        pix: {
+            qtd: MetasRegrasJSON,
+            monetario: MetasRegrasJSON
+        },
+        recarga: {
+            qtd: MetasRegrasJSON,
+            monetario: MetasRegrasJSON
+        },
+        pesquisa: {
+            qtd: MetasRegrasJSON
+        }
+    },
     premios: {
-        ativar_roleta: boolean;
-        pontos_para_roleta: number;
-    };
-}
+        ativar_roleta: false,
+        pontos_para_roleta: 1000
+    }
+};
 
 export interface ModeloRegra {
     id: number;
@@ -110,12 +127,14 @@ export interface RankingTableProps {
 }
 
 export interface RuleInputProps {
-    value: number;
-    onChange: (novoFator: number) => void;
+    values: PontuacaoRegrasJSON;
     labelPontos?: string;
     labelReferencia?: string;
     min?: number;
     step?: number;
+    onChangePoints: (points: number) => void;
+    onChangeReference: (reference: number) => void;
+    isMoney?: boolean;
 }
 
 export interface BonusInputProps {

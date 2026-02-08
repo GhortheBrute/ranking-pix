@@ -1,4 +1,4 @@
-import {HistoryOperatorResponse, RankingTableProps} from "@/types";
+import {HistoryOperatorResponse, PontuacaoRegrasJSON, RankingTableProps} from "@/types";
 import {Medal, Trophy, TrendingUp, DollarSign, EyeOff, Eye, Filter, Loader2} from "lucide-react";
 import React, { useMemo, useState } from "react";
 import Podium from "./Podium";
@@ -40,23 +40,32 @@ export default function RankingTable({
         }
 
         try {
-            // 4. Chamada à API (Fetch-on-Demand)
+            // 4. Chamada a API
             const response = await fetchOperadorHistory(matricula, dataInicio, dataFim, torneioId);
             setChartData(response);
         } catch (error) {
             console.error("Erro ao buscar histórico:", error);
-            // Aqui você poderia setar um estado de erro visual se quisesse
         } finally {
             setLoadingChart(false);
         }
     };
+
+    const calculatePoints = (quantity: number, factor: PontuacaoRegrasJSON) => {
+        const points = factor.pontos;
+        const reference = factor.valor;
+
+        if (!reference || reference === 0) return 0;
+
+        const total = (quantity * points) / reference;
+
+        return Math.floor(total + 0.0001);
+    }
 
     // --- 1. LÓGICA DE CÁLCULO E ORDENAÇÃO ---
     const dadosProcessados = useMemo(() => {
         // Mapeia adicionando o campo de pontos calculados
         const listaComPontos = dados.map((item) => {
             let pontos = 0;
-            const margem = 0.0001;
 
             if (tipo === 'MATRIZ') {
                 // Regra Matriz: Vale a quantidade de transações únicas
@@ -65,11 +74,16 @@ export default function RankingTable({
                 const p = regras?.pontuacao;
 
                 if (p) {
-                    pontos += Math.floor((item.pix.qtd * p.fator_qtd_pix) + margem);
-                    pontos += Math.floor((item.pix.valor * p.fator_valor_pix) + margem);
-                    pontos += Math.floor((item.recarga.qtd * p.fator_qtd_recarga) + margem);
-                    pontos += Math.floor((item.recarga.valor * p.fator_valor_recarga) + margem);
-                    pontos += Math.floor((item.pesquisas * (p.fator_qtd_pesquisas || 0)) + margem); // Garante compatibilidade se o campo for novo
+                    // PIX
+                    pontos += calculatePoints(item.pix.qtd, p.pix.qtd);
+                    pontos += calculatePoints(item.pix.valor, p.pix.monetario);
+
+                    // RECARGA
+                    pontos += calculatePoints(item.recarga.qtd, p.recarga.qtd);
+                    pontos += calculatePoints(item.recarga.valor, p.recarga.monetario);
+
+                    // PESQUISA
+                    pontos += calculatePoints(item.pesquisas, p.pesquisas.qtd);
                 } else {
                     // Fallback se não tiver regras carregadas: soma quantidades simples para não ficar zerado
                     pontos = item.pix.qtd + item.recarga.qtd + item.pesquisas;

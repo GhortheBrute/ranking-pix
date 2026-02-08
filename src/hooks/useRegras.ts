@@ -4,24 +4,61 @@ import {fetchRegras, saveRegras, toggleRegras} from "@/services/api";
 
 const REGRAS_DEFAULT: RegrasJSON = {
     pontuacao: {
-        fator_qtd_pix: 1,
-        fator_valor_pix: 0.00,
-        fator_qtd_recarga: 0,
-        fator_valor_recarga: 15.00,
+        pix: {
+            qtd: {
+                pontos: 1,
+                valor: 10
+            },
+            monetario: {
+                pontos: 0,
+                valor: 0.00
+            }
+        },
+        recarga: {
+            qtd: {
+                pontos: 0,
+                valor: 0
+            },
+            monetario: {
+                pontos: 1,
+                valor: 15.00
+            }
+        },
         dias_especiais: [],
-        fator_qtd_pesquisas: 0
+        pesquisas: {
+            qtd: {
+                pontos: 1,
+                valor: 1
+            },
+        }
     },
     bonus: {
-        meta_pix_qtd: 0,
-        meta_pix_valor: 0.00,
-        pontos_bonus_pix_qtd: 0,
-        pontos_bonus_pix_valor: 0.00,
-        meta_recarga_qtd: 0,
-        meta_recarga_valor: 0.00,
-        pontos_bonus_recarga_qtd: 0,
-        pontos_bonus_recarga_valor: 0.00,
-        meta_pesquisa: 0,
-        pontos_bonus_pesquisa: 0
+        pix: {
+            qtd: {
+                meta: 0,
+                pontos: 0
+            },
+            monetario: {
+                meta: 0.00,
+                pontos: 0
+            }
+        },
+        recarga: {
+            qtd: {
+                meta: 0,
+                pontos: 0
+            },
+            monetario: {
+                meta: 0.00,
+                pontos: 0
+            }
+        },
+        pesquisa: {
+            qtd: {
+                meta: 0,
+                pontos: 0
+            }
+        }
     },
     premios: {
         ativar_roleta: false,
