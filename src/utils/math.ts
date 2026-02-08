@@ -1,5 +1,7 @@
 // src/utils/math.ts
 
+import { PontuacaoRegrasJSON } from "@/types";
+
 // Calcula o Máximo Divisor Comum
 export function mdc(a: number, b: number): number {
     return b === 0 ? a : mdc(b, a % b);
@@ -48,3 +50,14 @@ export function formatarFatorAmigavel(
     // Ex: "1 ponto a cada 50 PIX"
     return `${points} ${pointsLabel} a cada ${reference} ${itemLabel}`;
 }
+
+export function calculatePoints(quantity: number, factor: PontuacaoRegrasJSON) {
+        const points = factor.pontos;
+        const reference = factor.valor;
+
+        if (!reference || reference === 0) return 0;
+
+        const total = (quantity * points) / reference;
+
+        return Math.floor(total + 0.0001);
+    }

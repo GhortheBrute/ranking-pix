@@ -1,8 +1,8 @@
 import React, {useEffect, useState} from "react";
-import {DiaEspecial, ModeloRegra, RegrasJSON} from "@/types";
-import {fetchRegras, saveRegras, toggleRegras} from "@/services/api";
+import { ModeloRegra, RegrasJSON} from "@/types";
+import {fetchRegras, saveRegras, toggleRegras } from "@/services/api";
 
-const REGRAS_DEFAULT: RegrasJSON = {
+const DEFAULT_RULES: RegrasJSON = {
     pontuacao: {
         pix: {
             qtd: {
@@ -67,33 +67,32 @@ const REGRAS_DEFAULT: RegrasJSON = {
 };
 
 export function useRegras() {
-    const [modelos, setModelos] = useState<ModeloRegra[]>([]);
+    const [rules, setRules] = useState<ModeloRegra[]>([]);
     const [loading, setLoading] = useState(true);
-
-    const [novoDiaData, setNovoDiaData] = useState('');
-    const [novoDiaFator, setNovoDiaFator] = useState(2); // Padrão dobrado.
 
     // Modal e Edição
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [activeTab, setActiveTab] = useState<'financeiro' | 'gamificacao' | 'premios'>('financeiro');
 
     // Estado do Formulário (Nome + JSON separado)
     const [editId, setEditId] = useState<number | null>(null);
-    const [formNome, setFormNome] = useState('');
-    const [formRegras, setFormRegras] = useState<RegrasJSON>(REGRAS_DEFAULT);
+    const [formName, setFormName] = useState('');
+    const [formRules, setFormRules] = useState<RegrasJSON>(DEFAULT_RULES);
+
+    // Navegação
+    const [activeTab, setActiveTab] = useState<'financeiro' | 'gamificacao' | 'premios'>('financeiro');
 
     // 1. Carregar Lista
-    const fetchModelos = async () => {
+    const fetchRules = async () => {
         try {
             const data = await fetchRegras();
 
             // Garante que o campo 'regras' seja um objeto, mesmo que venha string do PHP
-            const formatado = data.map((m: ModeloRegra) => ({
+            const formated = data.map((m: ModeloRegra) => ({
                 ...m,
                 regras: typeof m.regras === 'string' ? JSON.parse(m.regras) : m.regras
             }));
 
-            setModelos(formatado);
+            setRules(formated);
         } catch (error) {
             console.error(error);
         } finally {
@@ -102,136 +101,85 @@ export function useRegras() {
     };
 
     useEffect(() => {
-        fetchModelos();
+        fetchRules();
     }, []);
 
-    // 2. Abrir Modal (Criar ou Editar)
-    const handleOpenModal = (modelo?: ModeloRegra) => {
-        if (modelo) {
-            // Edição
-            setEditId(modelo.id);
-            setFormNome(modelo.nome);
-            setFormRegras(typeof modelo.regras === 'string' ? JSON.parse(modelo.regras) : modelo.regras);
-        } else {
-            // Novo
-            setEditId(null);
-            setFormNome('');
-            setFormRegras(REGRAS_DEFAULT);
-        }
-        setActiveTab('financeiro');
+    const updateRuleValue = (
+        category: keyof RegrasJSON,
+        item: string,
+        subItem: string,
+        field: string,
+        value: number
+    ) => {
+        setFormRules(prev=> {
+            const catObj = prev[category] as any;
+
+            return {
+                ...prev,
+                [category]: {
+                    ...catObj,
+                    [item]: {
+                        ...catObj[item],
+                        [subItem]: {
+                            ...catObj[item][subItem],
+                            [field]: value
+                        }
+                    }
+                }
+            }
+        })
+    };
+
+    const openNew = () => {
+        setFormName('');
+        setFormRules(DEFAULT_RULES);
+        setEditId(null);
         setIsModalOpen(true);
     };
 
-    // 3. Salvar
-    const handleSave = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const openEdit = (rule: ModeloRegra) => {
+        setFormName(rule.nome);
+        setFormRules(rule.regras as RegrasJSON);
+        setEditId(rule.id);
+        setIsModalOpen(true);
+    };
+
+    const onToggle = async (id: number) => {
+        if (!confirm('Deseja alterar o status deste modelo?')) return;
+        await toggleRegras('toggle_status', id);
+        await fetchRules();
+    }
+
+    const save = async () => {
         try {
-            const payload = {
-                id: editId, // Se for null, o PHP ignora (insert)
-                nome: formNome,
-                regras: formRegras,
-                is_edit: !!editId // true se tiver ID
-            };
-
-            const data = await saveRegras(payload);
-
-            if (data.success) {
-                await fetchModelos();
-                setIsModalOpen(false);
-            } else {
-                alert('Erro: ' + data.error);
-            }
-        } catch (error) {
-            alert('Erro de conexão:' + error);
+            await saveRegras({ id: editId, nome: formName, regras: formRules });
+            await fetchRules();
+            setIsModalOpen(false);
+        } catch (e) {
+            alert('Erro ao salvar: ' + e);
         }
     };
 
-    // 4. Toggle Ativo/Inativo
-    const handleToggle = async (id: number) => {
-        if (!confirm('Deseja alterar o status deste modelo?')) return;
-        await toggleRegras('toggle_status', id);
-        await fetchModelos();
-    };
-
-    const handleAddDia = () => {
-        if (!novoDiaData) return;
-
-        const novoDia: DiaEspecial = {
-            data: novoDiaData,
-            fator: Number(novoDiaFator)
-        };
-
-        setFormRegras(prev => ({
-            ...prev,
-            pontuacao: {
-                ...prev.pontuacao,
-                dias_especiais: [...(prev.pontuacao.dias_especiais || []), novoDia]
-            }
-        }));
-
-        setNovoDiaData('');
-        setNovoDiaFator(2);
-    }
-
-    const handleRemoveDia = (index: number) => {
-        setFormRegras(prev => {
-            const novaLista = [...(prev.pontuacao.dias_especiais || [])];
-            novaLista.splice(index, 1);
-            return {
-                ...prev,
-                pontuacao: {
-                    ...prev.pontuacao,
-                    dias_especiais: novaLista
-                }
-            };
-        });
-    };
-
-    // Função auxiliar para atualizar o JSON aninhado
-    const updateRegra = (section: keyof RegrasJSON, field: string, value: number | string) => {
-        setFormRegras(prev => ({
-            ...prev,
-            [section]: {
-                ...prev[section],
-                [field]: Number(value) // Força número para evitar erro de cálculo
-            }
-        }));
-    };
-
-    // Atualiza booleano
-    const updateBool = (section: keyof RegrasJSON, field: string, value: boolean) => {
-        setFormRegras(prev => ({
-            ...prev,
-            [section]: {...prev[section], [field]: value}
-        }));
-    };
-
     return {
-        handleOpenModal,
-        handleSave,
-        handleToggle,
-        handleAddDia,
-        updateRegra,
-        updateBool,
-        activeTab,
-        setActiveTab,
-        editId,
-        setEditId,
-        formNome,
-        setFormNome,
-        formRegras,
-        setFormRegras,
-        fetchModelos,
-        handleRemoveDia,
-        isModalOpen,
-        setIsModalOpen,
+        rules,
         loading,
-        setLoading,
-        modelos,
-        setModelos,
-        novoDiaData,
-        setNovoDiaData,
-        novoDiaFator,
-        setNovoDiaFator
-    }
+        form: {
+            name: formName,
+            setName: setFormName,
+            rules: formRules,
+            setRules: setFormRules,
+            updateRuleValue,
+            editId
+        },
+        modal: {
+            isOpen: isModalOpen,
+            openNew,
+            openEdit,
+            close: () => setIsModalOpen(false),
+            save,
+            onToggle,
+            activeTab,
+            setActiveTab
+        }
+    };
 }

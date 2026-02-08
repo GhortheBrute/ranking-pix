@@ -1,4 +1,5 @@
 import { Metrica, RegrasJSON } from "@/types";
+import { calculatePoints } from "@/utils/math";
 import {
     BarChart,
     Bar,
@@ -34,11 +35,11 @@ const CustomTooltip = ({ active, payload, label, regras }: CustomTooltipProps) =
 
         // Cálculos de Pontos (Exemplo básico usando as regras)
         // Ajuste conforme a lógica real do seu sistema
-        const pontosPix = (data.pix.qtd * (regras?.pontuacao?.fator_qtd_pix || 0)) + 
-                          (data.pix.valor * (regras?.pontuacao?.fator_valor_pix || 0));
+        const pontosPix = calculatePoints(data.pix.qtd, regras?.pontuacao?.pix.qtd) + 
+                          calculatePoints(data.pix.valor, regras?.pontuacao?.pix.monetario);
         
-        const pontosRecarga = (data.recarga.qtd * (regras?.pontuacao?.fator_qtd_recarga || 0)) + 
-                              (data.recarga.valor * (regras?.pontuacao?.fator_valor_recarga || 0));
+        const pontosRecarga = calculatePoints(data.recarga.qtd, regras?.pontuacao?.recarga.qtd) + 
+                              calculatePoints(data.recarga.valor, regras?.pontuacao?.recarga.monetario);
 
         const totalPontos = pontosPix + pontosRecarga;
 

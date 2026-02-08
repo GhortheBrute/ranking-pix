@@ -127,7 +127,8 @@ export interface RankingTableProps {
 }
 
 export interface RuleInputProps {
-    values: PontuacaoRegrasJSON;
+    points: number;
+    reference: number;
     labelPontos?: string;
     labelReferencia?: string;
     min?: number;
@@ -170,8 +171,6 @@ export interface RegrasModalProps {
     formRegras: RegrasJSON;
     setFormRegras: React.Dispatch<React.SetStateAction<RegrasJSON>>;
     onSave: (e: React.FormEvent) => void;
-    updateRegra: (section: keyof RegrasJSON, field: string, value: number | string) => void;
-    updateBool: (section: keyof RegrasJSON, field: string, value: boolean) => void;
 }
 
 export interface Logs {

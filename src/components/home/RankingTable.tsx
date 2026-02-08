@@ -252,7 +252,7 @@ export default function RankingTable({
                                                                         <div className="w-full">
                                                                             <div className="flex justify-between items-center mb-2 px-2">
                                                                                 <h4 className="text-sm font-bold text-gray-700">
-                                                                                    Desempenho Diário - {chartData.operador.nome}
+                                                                                    Desempenho Diário
                                                                                 </h4>
                                                                                 {/* Legenda simples */}
                                                                                 <div className="flex gap-4 text-xs">

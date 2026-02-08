@@ -4,9 +4,8 @@ import React, { useState, useEffect } from 'react';
 
 
 export default function RuleInput({
-    values,
-    onChangePoints,
-    onChangeReference,
+    points,
+    reference,
     labelPontos = "Pontos",
     labelReferencia = "Referência",
     step = 1,
@@ -20,12 +19,20 @@ export default function RuleInput({
     // Roda apenas quando o componente monta OU quando o valor vem do banco pela primeira vez (sai de 0)
     // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => {
-        if (values.pontos !== 0) { 
+        if (points !== 0) { 
             // eslint-disable-next-line react-hooks/set-state-in-effect
-            setPontos(values.pontos);
-            setReferencia(values.valor);
+            setPontos(points);
+            setReferencia(reference);
         }
     }, []); // Array vazio = só roda na montagem (evita o "pulo")
+
+    const onChangePoints = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setPontos(Number(e.target.value));
+    }
+
+    const onChangeReference = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setReferencia(Number(e.target.value));
+    }
 
 
     return (
@@ -36,7 +43,7 @@ export default function RuleInput({
                     type="number" 
                     min={min}
                     value={pontos}
-                    onChange={(e) => onChangePoints(Number(e.target.value))}
+                    onChange={onChangePoints}
                     className="w-[80px] p-1 border rounded text-center font-bold text-blue-700 outline-none focus:ring-1 focus:ring-blue-400"
                 />
                 <span className="font-medium">{labelPontos}</span>
@@ -50,7 +57,7 @@ export default function RuleInput({
                     min={min}
                     step={step}
                     value={referencia}
-                    onChange={(e) => onChangeReference(Number(e.target.value))}
+                    onChange={onChangeReference}
                     className="w-[80px] p-1 border rounded text-center font-bold text-slate-700 outline-none focus:ring-1 focus:ring-blue-400"
                 />
                 <span className="font-medium">{labelReferencia}</span>

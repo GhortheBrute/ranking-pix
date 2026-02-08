@@ -4,8 +4,8 @@ import React from 'react';
 import { Calculator, Edit, Gift, Plus, Save, Trophy, X } from 'lucide-react';
 import { RegrasModalProps } from "@/types";
 import RuleInput from '@/components/Rules/RuleInput';
-import BonusInput from "@/components/BonusInput";
-import DiasEspeciaisInput from "@/components/DiasEspeciaisInput";
+import BonusInput from "@/components/Rules/BonusInput";
+import DiasEspeciaisInput from "@/components/Rules/DiasEspeciaisInput";
 
 
 export default function RegrasModal({
@@ -19,28 +19,11 @@ export default function RegrasModal({
     formRegras,
     setFormRegras,
     onSave,
-    updateRegra,
-    updateBool
-}: RegrasModalProps) {
+    updateRuleValue,
+}: RegrasModalProps & { updateRuleValue: (c: any, i: string, s: string, f: string, v: number ) => void }) {
 
     if (!isOpen) return null;
 
-    // Função Helper para atualizar níveis profundos (ex: pontuacao > pix > qtd > pontos)
-    const updateDeepRegra = (categoria: 'pontuacao' | 'bonus', tipo: string, subtipo: string, campo: string, valor: any) => {
-        setFormRegras(prev => ({
-            ...prev,
-            [categoria]: {
-                ...prev[categoria],
-                [tipo]: {
-                    ...prev[categoria][tipo as keyof typeof prev[categoria]], // ex: pix
-                    [subtipo]: {
-                        ...(prev[categoria][tipo as keyof typeof prev[categoria]] as any)[subtipo], // ex: qtd
-                        [campo]: Number(valor) // ex: pontos
-                    }
-                }
-            }
-        }));
-    };
 
     return (
         <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 animate-in fade-in">
@@ -104,17 +87,19 @@ export default function RegrasModal({
                                         <RuleInput
                                             labelPontos="Pontos"
                                             labelReferencia="PIX"
-                                            values={formRegras.pontuacao.pix.qtd}
-                                            onChangePoints={(v) => updateRegra('pontuacao', 'pix.qtd.pontos', v)}
-                                            onChangeReference={(v) => updateRegra('pontuacao', 'pix.qtd.valor', v)}
+                                            points={formRegras.pontuacao.pix.qtd.pontos}
+                                            reference={formRegras.pontuacao.pix.qtd.valor}
+                                            onChangePoints={(v) => updateRuleValue('pontuacao', 'pix', 'qtd', 'pontos', v)}
+                                            onChangeReference={(v) => updateRuleValue('pontuacao', 'pix', 'qtd', 'valor', v)}
                                         />
                                         <RuleInput
                                             labelPontos="Pontos"
                                             labelReferencia="Reais (R$)"
                                             step={10}
-                                            values={formRegras.pontuacao.pix.monetario}
-                                            onChangePoints={(v) => updateRegra('pontuacao', 'pix.monetario.pontos', v)}
-                                            onChangeReference={(v) => updateRegra('pontuacao', 'pix.monetario.valor', v)}
+                                            points={formRegras.pontuacao.pix.monetario.pontos}
+                                            reference={formRegras.pontuacao.pix.monetario.valor}
+                                            onChangePoints={(v) => updateRuleValue('pontuacao', 'pix', 'monetario', 'pontos', v)}
+                                            onChangeReference={(v) => updateRuleValue('pontuacao', 'pix', 'monetario', 'valor', v)}
                                         />
                                     </div>
                                 </div>
@@ -126,17 +111,19 @@ export default function RegrasModal({
                                         <RuleInput
                                             labelPontos="Pontos"
                                             labelReferencia="Recargas"
-                                            values={formRegras.pontuacao.recarga.qtd}
-                                            onChangePoints={(v) => updateRegra('pontuacao', 'recarga.qtd.pontos', v)}
-                                            onChangeReference={(v) => updateRegra('pontuacao', 'recarga.qtd.valor', v)}
+                                            points={formRegras.pontuacao.recarga.qtd.pontos}
+                                            reference={formRegras.pontuacao.recarga.qtd.valor}
+                                            onChangePoints={(v) => updateRuleValue('pontuacao', 'recarga', 'qtd', 'pontos', v)}
+                                            onChangeReference={(v) => updateRuleValue('pontuacao', 'recarga', 'qtd', 'valor', v)}
                                         />
                                         <RuleInput
                                             labelPontos="Pontos"
                                             labelReferencia="Reais (R$)"
                                             step={15}
-                                            values={formRegras.pontuacao.recarga.monetario}
-                                            onChangePoints={(v) => updateRegra('pontuacao', 'recarga.monetario.pontos', v)}
-                                            onChangeReference={(v) => updateRegra('pontuacao', 'recarga.monetario.valor', v)}
+                                            points={formRegras.pontuacao.recarga.monetario.pontos}
+                                            reference={formRegras.pontuacao.recarga.monetario.valor}
+                                            onChangePoints={(v) => updateRuleValue('pontuacao', 'recarga', 'monetario', 'pontos', v)}
+                                            onChangeReference={(v) => updateRuleValue('pontuacao', 'recarga', 'monetario', 'valor', v)}
                                         />
                                     </div>
                                 </div>
@@ -164,8 +151,8 @@ export default function RegrasModal({
                                             unitMeta="transações"
                                             meta={formRegras.bonus.pix.qtd.meta}
                                             premio={formRegras.bonus.pix.qtd.pontos}
-                                            onMetaChange={v => updateRegra('bonus', 'meta_pix_qtd', v)}
-                                            onPremioChange={v => updateRegra('bonus', 'pontos_bonus_pix_qtd', v)}
+                                            onMetaChange={v => updateRuleValue('bonus', 'pix', 'qtd', 'meta', v)}
+                                            onPremioChange={v => updateRuleValue('bonus', 'pix', 'qtd', 'pontos', v)}
                                         />
                                         <BonusInput
                                             labelMeta="Meta de Valor"
@@ -173,8 +160,8 @@ export default function RegrasModal({
                                             stepMeta={50}
                                             meta={formRegras.bonus.pix.monetario.meta}
                                             premio={formRegras.bonus.pix.monetario.pontos}
-                                            onMetaChange={v => updateRegra('bonus', 'meta_pix_valor', v)}
-                                            onPremioChange={v => updateRegra('bonus', 'pontos_bonus_pix_valor', v)}
+                                            onMetaChange={v => updateRuleValue('bonus', 'pix', 'monetario', 'meta', v)}
+                                            onPremioChange={v => updateRuleValue('bonus', 'pix', 'monetario', 'pontos', v)}
                                         />
                                     </div>
                                 </div>
@@ -188,8 +175,8 @@ export default function RegrasModal({
                                             unitMeta="recargas"
                                             meta={formRegras.bonus.recarga.qtd.meta}
                                             premio={formRegras.bonus.recarga.qtd.pontos}
-                                            onMetaChange={v => updateRegra('bonus', 'meta_recarga_qtd', v)}
-                                            onPremioChange={v => updateRegra('bonus', 'pontos_bonus_recarga_qtd', v)}
+                                            onMetaChange={v => updateRuleValue('bonus', 'recarga', 'qtd', 'meta', v)}
+                                            onPremioChange={v => updateRuleValue('bonus', 'recarga', 'qtd', 'pontos', v)}
                                         />
                                         <BonusInput
                                             labelMeta="Meta de Valor"
@@ -197,8 +184,8 @@ export default function RegrasModal({
                                             stepMeta={15}
                                             meta={formRegras.bonus.recarga.monetario.meta}
                                             premio={formRegras.bonus.recarga.monetario.pontos}
-                                            onMetaChange={v => updateRegra('bonus', 'meta_recarga_valor', v)}
-                                            onPremioChange={v => updateRegra('bonus', 'pontos_bonus_recarga_valor', v)}
+                                            onMetaChange={v => updateRuleValue('bonus', 'recarga', 'monetario', 'meta', v)}
+                                            onPremioChange={v => updateRuleValue('bonus', 'recarga', 'monetario', 'pontos', v)}
                                         />
                                     </div>
                                 </div>
@@ -207,35 +194,7 @@ export default function RegrasModal({
 
                         {/* ABA PRÊMIOS */}
                         {activeTab === 'premios' && (
-                            <div className="animate-in fade-in slide-in-from-bottom-2">
-                                <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-6 rounded border border-purple-100 mb-4">
-                                    <div className="flex items-center gap-3 mb-4">
-                                        <input
-                                            type="checkbox"
-                                            id="checkRoleta"
-                                            className="w-5 h-5 rounded text-blue-600 focus:ring-blue-500"
-                                            checked={formRegras.premios.ativar_roleta}
-                                            onChange={e => updateBool('premios', 'ativar_roleta', e.target.checked)}
-                                        />
-                                        <label htmlFor="checkRoleta" className="font-bold text-slate-800">
-                                            Ativar Sistema de Roleta/Sorteio
-                                        </label>
-                                    </div>
-
-                                    <div className={`transition-opacity ${formRegras.premios.ativar_roleta ? 'opacity-100' : 'opacity-50 pointer-events-none'}`}>
-                                        <label className="block text-sm text-slate-600 mb-1">Pontos necessários para girar</label>
-                                        <input
-                                            type="number" step="100" min="0"
-                                            className="w-full p-2 border rounded bg-white"
-                                            value={formRegras.premios.pontos_para_roleta}
-                                            onChange={e => updateRegra('premios', 'pontos_para_roleta', e.target.value)}
-                                        />
-                                        <p className="text-xs text-purple-600 mt-2">
-                                            * Quando o operador atingir essa pontuação, aparecerá um botão para ele resgatar um prêmio aleatório.
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
+                            <h1>🏗️ Em construção</h1>
                         )}
                     </div>
                 </div>
